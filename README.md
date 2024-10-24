@@ -15,6 +15,8 @@ Format: Content (Note date if completed)
 
 ## Front end
 
+- [ ] Front-end frame construction (project home page, documentation)
+
 ## Back end
 
 ## Algorithm
