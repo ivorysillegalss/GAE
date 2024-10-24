@@ -1,4 +1,4 @@
-English | [简体中文](./README-CN.md)
+English | [简体中文](./README_CN.md)
 
 <p align="center">
 <img src="https://avatars.githubusercontent.com/u/113702528?s=96&v=4" alt="Gae" width="100"/>
