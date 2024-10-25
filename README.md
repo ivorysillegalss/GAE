@@ -1,7 +1,7 @@
 English | [简体中文](./README_CN.md)
 
 <p align="center">
-<img src="/assets/logo.jpg" alt="Gae" width="100"/>
+<img src="/assets/logo.png" alt="Gae" width="100"/>
 </p>
 <h2 align="center"> GAE - Github Ability Evaluator</h2>
 
