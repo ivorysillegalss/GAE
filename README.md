@@ -1,9 +1,9 @@
 English | [简体中文](./README_CN.md)
 
 <p align="center">
-<img src="https://avatars.githubusercontent.com/u/113702528?s=96&v=4" alt="Gae" width="100"/>
+<img src="/assets/logo.jpg" alt="Gae" width="100"/>
 </p>
-<h2 align="center"> Gae - Github Ability Evaluator</h2>
+<h2 align="center"> GAE - Github 能力评估者</h2>
 
 - 📶 Powerful github configuration
 - 🧱 Basic competency assessment
@@ -23,4 +23,4 @@ Format: Content (Note date if completed)
 
 # 🎈 Project directory
 
-- Front-end
+- assets -
