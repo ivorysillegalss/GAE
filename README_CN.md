@@ -1,9 +1,9 @@
 [English](./README.md) | 简体中文
 
 <p align="center">
-<img src="https://avatars.githubusercontent.com/u/113702528?s=96&v=4" alt="Gae" width="100"/>
+<img src="/assets/logo.jpg" alt="Gae" width="100"/>
 </p>
-<h2 align="center"> Gae - Github Ability Evaluator</h2>
+<h2 align="center"> GAE - Github Ability Evaluator</h2>
 
 - 📶 供应强大的 github 配置
 - 🧱 基础的能力评估
@@ -23,4 +23,11 @@
 
 # 🎈 项目目录
 
-- Front-end
+- **assets** - 项目静态资源
+
+- **example** - 项目 demo
+
+- **packages** - 项目代码
+  - **font** - 前端代码
+  - **back** - 后端代码
+  - **algorithm** - 算法代码
