@@ -3,7 +3,7 @@
 <p align="center">
 <img src="/assets/logo.jpg" alt="Gae" width="100"/>
 </p>
-<h2 align="center"> GAE - Github Ability Evaluator</h2>
+<h2 align="center"> GAE - Github 能力评估者</h2>
 
 - 📶 供应强大的 github 配置
 - 🧱 基础的能力评估
