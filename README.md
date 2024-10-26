@@ -9,7 +9,7 @@ English | [简体中文](./README_CN.md)
 - 🧱 Basic competency assessment
 - 💗 Multi-user capability assessment
 
-# Tasks
+# 📜Tasks
 
 Format: Content (Note date if completed)
 
@@ -19,9 +19,13 @@ Format: Content (Note date if completed)
 
 ## Back end
 
+- [ ] Basic data collection
+
 ## Algorithm
 
-# 🎈 Project directory
+- [ ] Basic algorithm analysis
+
+# 🎈Project directory
 
 - **assets** - Project static assets
 
@@ -31,3 +35,16 @@ Format: Content (Note date if completed)
   - **font** - Front-end code
   - **back** - Back-end code
   - **algorithm** - Algorithm code
+
+# 🔖Push 之前的操作
+
+```bash
+git checkout master
+git pull
+//处理冲突
+git checkout your branch
+git rebase master
+git add .
+git commit -m (your commit)
+git push
+```
