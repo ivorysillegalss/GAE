@@ -39,7 +39,7 @@ Format: Content (Note date if completed)
 # 🔖Push 之前的操作
 
 ```bash
-git checkout master
+git checkout main
 git pull
 //处理冲突
 git checkout your branch
