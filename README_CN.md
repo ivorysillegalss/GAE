@@ -39,7 +39,7 @@
 # 🔖Before Push
 
 ```bash
-git checkout master
+git checkout main
 git pull
 //处理冲突
 git checkout your branch
