@@ -7,11 +7,15 @@ import (
 
 type ConsumeExecutor struct {
 	generateEvent domain.GenerateEvent
+	talentEvent   domain.TalentEvent
 }
 
 func (d *ConsumeExecutor) SetupConsume() {
 	d.generateEvent.AsyncStreamStorageDataReady()
 	log.GetTextLogger().Info("AsyncStreamStorageDataReady QUEUE start")
+
+	d.talentEvent.ConsumeTalent()
+	log.GetTextLogger().Info("Get UnRank Cleansing Talent Queue Start")
 
 	log.GetTextLogger().Info("ALL-----QUEUE----START-----SUCCESSFULLY")
 	//TODO
