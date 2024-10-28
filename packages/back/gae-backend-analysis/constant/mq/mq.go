@@ -28,3 +28,11 @@ const (
 	UserChatReadyCallingQueue    = "user.call.chat.ready.queue"
 	UserChatReadyCallingKey      = "user.call.chat.ready.event"
 )
+
+const (
+	KafkaDefaultLocalBroker = "localhost:9092"
+
+	FirstOffset          = "first"
+	UnRankCleansingGroup = "gaeMessageGroup"
+	UnRankCleansingTopic = "gaeMessageTopic"
+)
