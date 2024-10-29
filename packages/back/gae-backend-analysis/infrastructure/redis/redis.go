@@ -17,6 +17,8 @@ type Client interface {
 
 	LRange(ctx context.Context, k string, start int, end int) ([]string, error)
 	LRem(ctx context.Context, k string, count int, v any) (int64, error)
+	LPush(ctx context.Context, k string, v any) error
+	RPop(ctx context.Context, k string) (string, error)
 
 	ZRem(ctx context.Context, k string, vs ...any) (int64, error)
 	// ZScore 获取指定元素的分数 Zset
@@ -28,6 +30,12 @@ type Client interface {
 
 	//TODO 这个方法有问题！！！！
 	GetStruct(ctx context.Context, k string, targetStruct any) error
+
+	SAdd(ctx context.Context, k string, v ...string) error
+	SAddExpire(ctx context.Context, ddl time.Duration, k string, v string) error
+	SISMember(ctx context.Context, k string, v string) bool
+	SCard(ctx context.Context, k string) int
+	SMembers(ctx context.Context, k string) ([]string, error)
 
 	HSet(ctx context.Context, k string, v ...any) error
 	HGet(ctx context.Context, k string, field string) (any, error)
@@ -78,6 +86,14 @@ func (r *redisClient) LRange(ctx context.Context, k string, start int, end int) 
 	return r.rcl.LRange(ctx, k, int64(start), int64(end)).Result()
 }
 
+func (r *redisClient) LPush(ctx context.Context, k string, v any) error {
+	return r.rcl.LPush(ctx, k, v).Err()
+}
+
+func (r *redisClient) RPop(ctx context.Context, k string) (string, error) {
+	return r.rcl.RPop(ctx, k).Result()
+}
+
 func (r *redisClient) SetStruct(ctx context.Context, k string, vStruct any) error {
 	vJsonData, _ := json.Marshal(vStruct)
 	return r.Set(ctx, k, vJsonData)
@@ -121,6 +137,32 @@ func (r *redisClient) ZRange(ctx context.Context, k string) ([]string, error) {
 
 func (r *redisClient) LRem(ctx context.Context, k string, count int, v any) (int64, error) {
 	return r.rcl.LRem(ctx, k, int64(count), v).Result()
+}
+
+func (r *redisClient) SAddExpire(ctx context.Context, ddl time.Duration, k string, v string) error {
+	err := r.SAdd(ctx, k, v)
+	if err != nil {
+		return err
+	}
+	return r.rcl.Expire(ctx, k, ddl).Err()
+}
+
+func (r *redisClient) SAdd(ctx context.Context, k string, v ...string) error {
+	return r.rcl.SAdd(ctx, k, v).Err()
+}
+
+func (r *redisClient) SISMember(ctx context.Context, k string, v string) bool {
+	result, _ := r.rcl.SIsMember(ctx, k, v).Result()
+	return result
+}
+
+func (r *redisClient) SCard(ctx context.Context, k string) int {
+	result, _ := r.rcl.SCard(ctx, k).Result()
+	return int(result)
+}
+
+func (r *redisClient) SMembers(ctx context.Context, k string) ([]string, error) {
+	return r.rcl.SMembers(ctx, k).Result()
 }
 
 // HSet 支持批量添加 但是kv必须成对出现
@@ -175,7 +217,3 @@ func NewRedisApplication(addr string, password string) *InitRedisApplication {
 		Password: password,
 	}
 }
-
-//func (r *redisClient) Lru(ctx context.Context, maxCapacity int, dataType int) lru.Lru {
-//	return lru.NewLru(maxCapacity, dataType, r)
-//}

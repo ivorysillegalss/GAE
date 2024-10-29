@@ -38,10 +38,13 @@ type (
 
 	ConsumeErrorHandler func(ctx context.Context, msg kafka.Message, err error)
 
+	// ConsumeHandler 实现具体的业务逻辑
 	ConsumeHandler interface {
+		// Consume 假设在Kafka生产者处已经配置生产时消息为String形式序列化
 		Consume(ctx context.Context, key, value string) error
 	}
 
+	//与kafka交互的逻辑
 	kafkaReader interface {
 		FetchMessage(ctx context.Context) (kafka.Message, error)
 		CommitMessages(ctx context.Context, msgs ...kafka.Message) error
@@ -85,6 +88,7 @@ func MustNewQueue(c KqConf, handler ConsumeHandler, opts ...QueueOption) queue.M
 	return q
 }
 
+// NewQueue 创建新的多消费者连接
 func NewQueue(c KqConf, handler ConsumeHandler, opts ...QueueOption) (queue.MessageQueue, error) {
 	if err := c.SetUp(); err != nil {
 		return nil, err
