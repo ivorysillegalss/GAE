@@ -4,7 +4,9 @@ import (
 	"gae-backend-analysis/bootstrap"
 	"gae-backend-analysis/constant/sys"
 	"gae-backend-analysis/domain"
+	"gae-backend-analysis/handler"
 	"gae-backend-analysis/infrastructure/log"
+	jsoniter "github.com/json-iterator/go"
 	"strconv"
 	"sync"
 	"time"
@@ -21,16 +23,29 @@ func NewTalentCron(t domain.TalentRepository, p *bootstrap.PoolsFactory) domain.
 
 func (t *talentCron) AnalyseTalent() {
 	for {
-		offset, err := t.talentRepository.GetAndUpdateCleansingDataShardOffset()
+		offset, shardValue, err := t.talentRepository.GetAndUpdateCleansingDataShardOffset()
 		if err != nil {
 			log.GetTextLogger().Error("error in get cleansing data shard offset: " + strconv.Itoa(offset))
 		}
-		//TODO TBD
+
+		//TODO O(n)复杂度，待优化
+		var talents []domain.Talent
+		for _, data := range shardValue {
+			var talent domain.Talent
+			err = jsoniter.Unmarshal([]byte(data), &talent)
+			if err != nil {
+				log.GetTextLogger().Error("Error unmarshalling JSON: %v", err)
+			}
+			talents = append(talents, talent)
+		}
+
+		h := handler.NewIntermediateHandler()
 		var wg sync.WaitGroup
 		task := func() {
-			//TODO 此处RPC调用算法API，按需包装执行器
 			defer wg.Done()
+			h.WriteData(talents)
 		}
+
 		config := t.poolFactory.Pools[sys.ExecuteTalentAnalysis]
 		wg.Add(1)
 		err1 := config.Submit(task)

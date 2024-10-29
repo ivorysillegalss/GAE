@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"github.com/mattn/go-colorable"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -89,21 +90,21 @@ func (l *Logger) WithFields(fields ...interface{}) *Logger {
 }
 
 // Info 级别的日志记录方法
-func (l *Logger) Info(msg string) {
-	l.logger.Info(msg)
+func (l *Logger) Info(msg string, v ...any) {
+	l.logger.Info(fmt.Sprintf(msg, v...))
 }
 
 // Warn 级别的日志记录方法
-func (l *Logger) Warn(msg string) {
-	l.logger.Warn(msg)
+func (l *Logger) Warn(msg string, v ...any) {
+	l.logger.Warn(fmt.Sprintf(msg, v...))
 }
 
 // Error 级别的日志记录方法
-func (l *Logger) Error(msg string) {
-	l.logger.Error(msg)
+func (l *Logger) Error(msg string, v ...any) {
+	l.logger.Error(fmt.Sprintf(msg, v...))
 }
 
 // Fatal 级别的日志记录方法
-func (l *Logger) Fatal(msg string) {
-	l.logger.Fatal(msg)
+func (l *Logger) Fatal(msg string, v ...any) {
+	l.logger.Fatal(fmt.Sprintf(msg, v...))
 }

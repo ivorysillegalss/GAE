@@ -35,6 +35,7 @@ type Client interface {
 	SAddExpire(ctx context.Context, ddl time.Duration, k string, v string) error
 	SISMember(ctx context.Context, k string, v string) bool
 	SCard(ctx context.Context, k string) int
+	SMembers(ctx context.Context, k string) ([]string, error)
 
 	HSet(ctx context.Context, k string, v ...any) error
 	HGet(ctx context.Context, k string, field string) (any, error)
@@ -158,6 +159,10 @@ func (r *redisClient) SISMember(ctx context.Context, k string, v string) bool {
 func (r *redisClient) SCard(ctx context.Context, k string) int {
 	result, _ := r.rcl.SCard(ctx, k).Result()
 	return int(result)
+}
+
+func (r *redisClient) SMembers(ctx context.Context, k string) ([]string, error) {
+	return r.rcl.SMembers(ctx, k).Result()
 }
 
 // HSet 支持批量添加 但是kv必须成对出现

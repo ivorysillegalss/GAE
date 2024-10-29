@@ -21,7 +21,7 @@ type TalentEvent interface {
 
 type TalentRepository interface {
 	CleansingDataTemporaryStorageCache(header string, value string) error
-	GetAndUpdateCleansingDataShardOffset() (int, error)
+	GetAndUpdateCleansingDataShardOffset() (int, []string, error)
 }
 
 type TalentCron interface {

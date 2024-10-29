@@ -18,11 +18,15 @@ func NewTalentRepository(rcl redis.Client) domain.TalentRepository {
 	return &talentRepository{rcl: rcl}
 }
 
-func (t *talentRepository) GetAndUpdateCleansingDataShardOffset() (int, error) {
+func (t *talentRepository) GetAndUpdateCleansingDataShardOffset() (int, []string, error) {
 	ctx := context.Background()
 	pop, err := t.rcl.RPop(ctx, cache.TemporaryUnRankCleansingReadyShard)
 	a, _ := strconv.Atoi(pop)
-	return a, err
+	if err != nil {
+		return a, nil, err
+	}
+	members, err1 := t.rcl.SMembers(ctx, cache.TemporaryUnRankCleansingData+common.Infix+cache.TemporaryUnRankCleansingShard+common.Infix+pop)
+	return a, members, err1
 }
 
 // CleansingDataTemporaryStorageCache 分片存储
