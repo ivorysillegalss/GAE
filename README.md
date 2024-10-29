@@ -11,11 +11,9 @@ English | [简体中文](./README_CN.md)
 
 # 📜Tasks
 
-Format: Content (Note date if completed)
-
 ## Front end
 
-- [ ] Front-end frame construction (project home page, documentation)
+- [x] Front-end frame construction (project home page, documentation)
 
 ## Back end
 
@@ -24,6 +22,10 @@ Format: Content (Note date if completed)
 ## Algorithm
 
 - [ ] Basic algorithm analysis
+
+## Production
+
+- [ ] Basic product identification
 
 # 🎈Project directory
 
@@ -36,8 +38,7 @@ Format: Content (Note date if completed)
   - **back** - Back-end code
   - **algorithm** - Algorithm code
 
-# 🔖Push 之前的操作
-
+# 🔖Before Push 
 ```bash
 git checkout main
 git pull
