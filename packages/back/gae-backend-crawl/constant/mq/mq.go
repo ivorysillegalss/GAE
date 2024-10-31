@@ -30,9 +30,19 @@ const (
 )
 
 const (
+	MaxGoroutine            = 10
 	KafkaDefaultLocalBroker = "localhost:9092"
 
 	FirstOffset          = "first"
+	UnRankCleansingId    = 1
 	UnRankCleansingGroup = "gaeMessageGroup"
 	UnRankCleansingTopic = "gaeMessageTopic"
+
+	UnCleansingRepoId    = 2
+	UnCleansingRepoGroup = "gaeUnCleansingRepoGroup"
+	UnCleansingRepoTopic = "gaeUnCleansingRepoTopic"
+
+	UnCleansingUserId    = 3
+	UnCleansingUserGroup = "gaeUnCleansingUserGroup"
+	UnCleansingUserTopic = "gaeUnCleansingUserTopic"
 )

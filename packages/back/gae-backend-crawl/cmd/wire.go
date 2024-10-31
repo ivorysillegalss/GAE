@@ -6,15 +6,19 @@ package main
 
 import (
 	"gae-backend-crawl/bootstrap"
+	"gae-backend-crawl/crawl"
+	"gae-backend-crawl/executor"
 	"github.com/google/wire"
 )
 
 var appSet = wire.NewSet(
 	bootstrap.NewEnv,
+	bootstrap.NewKafkaConf,
 	bootstrap.NewDatabases,
 	bootstrap.NewPoolFactory,
-	bootstrap.NewKafkaConf,
 	bootstrap.NewBloomFilter,
+	crawl.NewRepoCrawl,
+	executor.NewCrawlExecutor,
 
 	wire.Struct(new(bootstrap.Application), "*"),
 )

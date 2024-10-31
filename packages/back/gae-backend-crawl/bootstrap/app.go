@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"context"
+	"gae-backend-crawl/executor"
 	"gae-backend-crawl/infrastructure/bloom"
 	"gae-backend-crawl/infrastructure/pool"
 	"gae-backend-crawl/infrastructure/redis"
@@ -10,10 +11,12 @@ import (
 )
 
 type Application struct {
-	Env          *Env
-	Databases    *Databases
-	PoolsFactory *PoolsFactory
-	Bloom        bloom.Client
+	Env           *Env
+	Databases     *Databases
+	PoolsFactory  *PoolsFactory
+	Bloom         bloom.Client
+	CrawlExecutor *executor.CrawlExecutor
+	KafkaConf     *KafkaConf
 }
 
 type Databases struct {

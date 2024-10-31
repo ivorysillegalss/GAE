@@ -13,6 +13,9 @@ type Env struct {
 
 	RedisAddr     string `mapstructure:"REDIS_DB_ADDR"`
 	RedisPassword string `mapstructure:"REDIS_DB_PASSWORD"`
+
+	GithubTokens string `mapstructure:"GITHUB_TOKENS"`
+	//env不支持存放数组 此处以字符串形式存储 逗号分隔
 }
 
 func NewEnv() *Env {
