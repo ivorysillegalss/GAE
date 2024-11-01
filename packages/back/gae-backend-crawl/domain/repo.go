@@ -30,7 +30,7 @@ type ContributorInfo struct {
 func NewRepositoryValue(repo *github.Repository) *RepositoryValue {
 	return &RepositoryValue{
 		RepoId:           *repo.ID,
-		OwnerName:        *repo.Owner.Name,
+		OwnerName:        *repo.Owner.Login,
 		OwnerId:          strconv.FormatInt(*repo.Owner.ID, 10),
 		Name:             *repo.Name,
 		CreatedAt:        repo.CreatedAt.Time.Unix(),
@@ -41,6 +41,7 @@ func NewRepositoryValue(repo *github.Repository) *RepositoryValue {
 		StargazersCount:  *repo.StargazersCount,
 		SubscribersCount: *repo.SubscribersCount,
 		WatchersCount:    *repo.WatchersCount,
+		ContributorsId:   new([]string),
 	}
 }
 

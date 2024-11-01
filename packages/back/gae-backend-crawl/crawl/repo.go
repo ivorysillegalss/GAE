@@ -69,8 +69,8 @@ func (r *repoCrawl) DoCrawl() {
 
 				repoId := getRepoId()
 				repo, _, err := client.Repositories.GetByID(ctx, repoId)
-				if err != nil {
-					log.GetTextLogger().Error("Error fetching repository by Id: %v", err)
+				if err != nil || repo == nil {
+					log.GetTextLogger().Warn("Error fetching repository by Id: %v", err)
 					continue
 				}
 
@@ -100,16 +100,21 @@ func (r *repoCrawl) DoCrawl() {
 				value := domain.NewRepositoryValue(repo)
 				for _, contributor := range allContributors {
 					formatId := strconv.FormatInt(*contributor.ID, 10)
-					id := *value.ContributorsId
-					id = append(id, formatId)
-					value.ContributorsId = &id
+
+					*value.ContributorsId = make([]string, len(allContributors))
+					ids := *value.ContributorsId
+
+					ids = append(ids, formatId)
+					value.ContributorsId = &ids
 
 					isExist := r.bloom.Check(formatId)
 					if !isExist {
 						contributorValue := domain.NewContributorValue(contributor)
-						marshal, _ := json.Marshal(contributorValue)
 
+						log.GetTextLogger().Info("success user: ", strconv.FormatInt(contributorValue.Id, 10))
+						marshal, _ := json.Marshal(contributorValue)
 						err := userMessagePusher.KPush(ctx, strconv.Itoa(int(time.Now().Unix())), string(marshal))
+
 						if err != nil {
 							log.GetTextLogger().Error("error pushing msg,err: ", err.Error())
 						}
@@ -119,11 +124,15 @@ func (r *repoCrawl) DoCrawl() {
 					}
 				}
 
+				log.GetTextLogger().Info("success repo: ", strconv.FormatInt(repoId, 10))
 				marshal, _ := jsoniter.Marshal(value)
 				err = repoMessagePusher.KPush(ctx, strconv.Itoa(int(time.Now().Unix())), string(marshal))
+
 				if err != nil {
 					log.GetTextLogger().Error("error pushing msg,err: ", err.Error())
 				}
+
+				time.Sleep(2 * time.Second)
 			}
 		}()
 	}

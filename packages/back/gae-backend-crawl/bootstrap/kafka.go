@@ -10,6 +10,7 @@ func initKafkaConf(*Env) map[int]kq.KqConf {
 
 	confMap := new(map[int]kq.KqConf)
 	m := *confMap
+	m = make(map[int]kq.KqConf)
 
 	UnRankCleansingGroup := kq.KqConf{
 		ServiceConf: service.ServiceConf{
