@@ -3,19 +3,13 @@ package elasticsearch
 import (
 	"context"
 	"gae-backend-analysis/constant/dao"
+	"gae-backend-analysis/infrastructure/log"
 	"github.com/olivere/elastic/v7"
-	"log"
 )
 
 var ctx = context.Background()
-var Url = "http://127.0.0.1:9200"
 
-//var esClient *elastic.Client
-
-var index = "student"
-
-// 定义一些变量，mapping为定制的index字段类型
-// number_of_replicas备份数 ， number_of_shards分片数
+// TODO 根据Talent搜索所需的元素，改造mapping,此处为示例
 const mapping = `
 {
    "settings":{
@@ -24,34 +18,9 @@ const mapping = `
    },
 }`
 
-// 初始化es连接
-//func init() {
-//	client, err := elastic.NewClient(
-//		elastic.SetURL(Url),
-//	)
-//	if err != nil {
-//		log.Fatal("es 连接失败:", err)
-//	}
-//	// ping通服务端，并获得服务端的es版本,本实例的es版本为version 7.16.2
-//	info, code, err := client.Ping(Url).Do(ctx)
-//	if err != nil {
-//		panic(err)
-//	}
-//	fmt.Println("Elasticsearch call code:", code, " version:", info.Version.Number)
-//	esClient = client
-//}
-
 type Client interface {
 	Ping() (int, error)
-}
-
-type esClient struct {
-	es *elastic.Client
-}
-
-func (es *esClient) Ping() (int, error) {
-	_, code, err := es.es.Ping(dao.EsUrl).Do(context.Background())
-	return code, err
+	AddDoc(index string, data any) (bool, error)
 }
 
 func NewElasticSearchClient() (Client, error) {
@@ -59,12 +28,71 @@ func NewElasticSearchClient() (Client, error) {
 		elastic.SetURL(dao.EsUrl),
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.GetTextLogger().Fatal(err.Error())
 	}
 	info, code, err := client.Ping(dao.EsUrl).Do(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		log.GetTextLogger().Fatal("error is :%v", err)
 	}
-	log.Println("Elasticsearch call code:", code, " version:", info.Version.Number)
+	log.GetTextLogger().Info("Elasticsearch call code:", code, " version:", info.Version.Number)
+
+	initEsIndex(client)
+
 	return &esClient{es: client}, nil
+}
+
+func initEsIndex(client *elastic.Client) {
+	//TODO 加入TalentRank所需的元素，构建搜索部分资源的表
+	//addIndex(client,"","")
+
+}
+
+type esClient struct {
+	es *elastic.Client
+}
+
+func addIndex(es *elastic.Client, index string, mapping string) bool {
+	exists, _ := checkIndex(es, index)
+	//不存在对应的索引
+	if exists {
+		return false
+	} else {
+		//不存在对应的索引
+		_, err := es.CreateIndex(index).BodyString(mapping).Do(ctx)
+		log.GetTextLogger().Error("error creating index ,error is :", err.Error())
+		return true
+	}
+}
+
+// 查看对应的索引是否存在 如果存在则跳过 不存在则重新创建
+func checkIndex(es *elastic.Client, index string) (bool, error) {
+	exists, err := es.IndexExists(index).Do(ctx)
+	if err != nil {
+		log.GetTextLogger().Error("error is:", err.Error())
+		return false, nil
+	}
+	return exists, nil
+
+}
+
+func (es *esClient) AddDoc(index string, data any) (bool, error) {
+	exist, err := checkIndex(es.es, index)
+	if err != nil {
+		log.GetTextLogger().Fatal("create index error,error is: %v", err.Error())
+		return false, err
+	}
+
+	if !exist {
+		log.GetTextLogger().Fatal("cannot find target index: %v", err.Error())
+	}
+	_, err = es.es.Index().Index(index).BodyJson(data).Do(ctx)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (es *esClient) Ping() (int, error) {
+	_, code, err := es.es.Ping(dao.EsUrl).Do(context.Background())
+	return code, err
 }
