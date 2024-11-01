@@ -25,3 +25,14 @@ const (
 	CommentBotId   = 2
 	MathSolveBotId = 10
 )
+
+// TODO MOVE，可配置化，elastic的配置项
+const (
+	EsUrl = "http://127.0.0.1:9200"
+)
+
+const (
+	OutputFilepath          = "output"
+	ParquetSuffix           = ".parquet"
+	ParquetDefaultGoroutine = 4
+)

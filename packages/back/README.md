@@ -1,4 +1,4 @@
 **TalentRank功能架构设计图**
 
 
-![5c670e1c46e7223dafb4c710f27d39b](https://github.com/user-attachments/assets/fb94f645-a7bd-4771-b899-e82d01d84571)
+![ffc9d8bf34df4276edc04281b03bd46](https://github.com/user-attachments/assets/66616ed7-880b-4ae7-941b-21476d8f4d16)

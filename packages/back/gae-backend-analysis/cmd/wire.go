@@ -29,16 +29,20 @@ var appSet = wire.NewSet(
 	bootstrap.NewRabbitConnection,
 	bootstrap.NewControllers,
 	bootstrap.NewExecutors,
+	bootstrap.NewKafkaConf,
 
 	repository.NewGenerationRepository,
 	repository.NewChatRepository,
 	repository.NewBotRepository,
+	repository.NewTalentRepository,
 
+	consume.NewTalentEvent,
 	consume.NewStorageEvent,
 	consume.NewGenerateEvent,
 	consume.NewMessageHandler,
 
 	cron.NewGenerationCron,
+	cron.NewTalentCron,
 
 	executor.NewCronExecutor,
 	executor.NewConsumeExecutor,

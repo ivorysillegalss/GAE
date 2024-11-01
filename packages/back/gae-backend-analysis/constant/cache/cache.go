@@ -44,3 +44,11 @@ const (
 	// StreamStorageReadyDataExpire 缓存信息保存的DDL
 	StreamStorageReadyDataExpire = 5 * time.Second
 )
+
+const (
+	TemporaryUnRankCleansingShardList     = "UnRankCleansingList"
+	TemporaryUnRankCleansingShardMaxValue = 100
+	TemporaryUnRankCleansingData          = "UnRankCleansing"
+	TemporaryUnRankCleansingShard         = "shard"
+	TemporaryUnRankCleansingReadyShard    = "UnRankCleansingReadyShardList"
+)
