@@ -1,29 +1,45 @@
 package domain
 
 type Talent struct {
-	//TODO 补充更多个人信息
-	username int
-	nickname int
-	email    string
-	location string
-	company  string
+	Repos        *[]Repo
+	Contributors *[]Contributor
+}
 
-	bio               string
-	Stars             int
-	Forks             int
-	PullRequest       int
-	RepositoryAmounts int
+type Repo struct {
+	RepoId           int64
+	OwnerName        string
+	OwnerId          string
+	Name             string
+	CreatedAt        int64
+	UpdatedAt        int64
+	ForksCount       int
+	NetworkCount     int
+	OpenIssuesCount  int
+	StargazersCount  int
+	SubscribersCount int
+	WatchersCount    int
+	ContributorsId   *[]string
+}
+
+type Contributor struct {
+	Login         string
+	Id            int64
+	AvatarURL     *string
+	URL           string
+	Contributions int
 }
 
 type TalentEvent interface {
-	ConsumeTalent()
+	ConsumeRepo()
+	ConsumeContributors()
 }
 
 type TalentRepository interface {
-	CleansingDataTemporaryStorageCache(header string, value string) error
-	GetAndUpdateCleansingDataShardOffset() (int, []string, error)
+	CleansingDataTemporaryStorageCache(header string, value string, businessId int) error
+	GetAndUpdateCleansingDataShardOffset(businessId int) (int, []string, error)
 }
 
 type TalentCron interface {
-	AnalyseTalent()
+	AnalyseContributor()
+	AnalyseRepo()
 }

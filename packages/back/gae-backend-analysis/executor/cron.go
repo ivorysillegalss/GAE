@@ -11,7 +11,8 @@ type CronExecutor struct {
 // SetupCron 启动定时任务
 func (d *CronExecutor) SetupCron() {
 
-	go d.TalentCron.AnalyseTalent()
+	go d.TalentCron.AnalyseContributor()
+	go d.TalentCron.AnalyseRepo()
 }
 
 func NewCronExecutor(t domain.TalentCron) *CronExecutor {
