@@ -6,10 +6,12 @@ import (
 	"github.com/zeromicro/go-zero/core/service"
 )
 
-func initKafkaConf(*Env) *kq.KqConf {
-	return &kq.KqConf{
+func initKafkaConf(*Env) map[int]kq.KqConf {
+	m := new(map[int]kq.KqConf)
+	confM := *m
+	conf := kq.KqConf{
 		ServiceConf: service.ServiceConf{
-			Name: "gaeMessageConsumerService",
+			Name: mq.UnRankCleansingService,
 		},
 		Brokers: []string{mq.KafkaDefaultLocalBroker},
 		Group:   mq.UnRankCleansingGroup,
@@ -17,9 +19,15 @@ func initKafkaConf(*Env) *kq.KqConf {
 		Offset:  mq.FirstOffset,
 		Conns:   1,
 	}
+	confM[mq.UnRankCleansingServiceId] = conf
+	return confM
 }
 
-func NewKafkaConf(e *Env) *kq.KqConf {
+func NewKafkaConf(e *Env) *KafkaConf {
 	conf := initKafkaConf(e)
-	return conf
+	return &KafkaConf{confMap: conf}
+}
+
+type KafkaConf struct {
+	confMap map[int]kq.KqConf
 }

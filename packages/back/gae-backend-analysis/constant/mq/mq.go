@@ -30,7 +30,9 @@ const (
 )
 
 const (
-	KafkaDefaultLocalBroker = "localhost:9092"
+	UnRankCleansingService   = "gaeMessageConsumerService"
+	UnRankCleansingServiceId = 1
+	KafkaDefaultLocalBroker  = "localhost:9092"
 
 	FirstOffset          = "first"
 	UnRankCleansingGroup = "gaeMessageGroup"

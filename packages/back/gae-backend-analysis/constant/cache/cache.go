@@ -46,6 +46,7 @@ const (
 )
 
 const (
+	// TemporaryUnRankCleansingShardList 此处数据全部代指仓库数据
 	TemporaryUnRankCleansingShardList     = "UnRankCleansingList"
 	TemporaryUnRankCleansingShardMaxValue = 100
 	TemporaryUnRankCleansingData          = "UnRankCleansing"
