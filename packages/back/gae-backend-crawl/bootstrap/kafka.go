@@ -12,19 +12,6 @@ func initKafkaConf(*Env) map[int]kq.KqConf {
 	m := *confMap
 	m = make(map[int]kq.KqConf)
 
-	UnRankCleansingGroup := kq.KqConf{
-		ServiceConf: service.ServiceConf{
-			Name: "gaeMessageConsumerService",
-		},
-		Brokers: []string{mq.KafkaDefaultLocalBroker},
-		Group:   mq.UnRankCleansingGroup,
-		Topic:   mq.UnRankCleansingTopic,
-		Offset:  mq.FirstOffset,
-		Conns:   1,
-	}
-
-	m[mq.UnRankCleansingId] = UnRankCleansingGroup
-
 	// 为 UnCleansingRepo 配置
 	UnCleansingRepoGroup := kq.KqConf{
 		ServiceConf: service.ServiceConf{

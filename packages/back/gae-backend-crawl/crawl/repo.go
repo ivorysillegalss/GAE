@@ -10,6 +10,7 @@ import (
 	kq "gae-backend-crawl/infrastructure/kafka"
 	"gae-backend-crawl/infrastructure/log"
 	"github.com/google/go-github/github"
+	_ "github.com/json-iterator/go"
 	jsoniter "github.com/json-iterator/go"
 	"strconv"
 	"strings"
@@ -33,6 +34,7 @@ var (
 	userMessagePusher *kq.Pusher
 	repoMessagePusher *kq.Pusher
 	ctx               context.Context
+	client            *github.Client
 )
 
 func init() {
@@ -48,6 +50,43 @@ func registerMessageQueue(r *repoCrawl) {
 	repoMessagePusher = kq.NewPusher(kqRepoConf.Brokers, kqRepoConf.Topic)
 }
 
+func crawlPushContributorsInfo(contributors *[]*github.Contributor, b bloom.Client) *[]string {
+	var contributorsValue []*domain.Contributor
+	var contributorsId []string
+	for _, contributor := range *contributors {
+		userV, _, err := client.Users.GetByID(ctx, *contributor.ID)
+
+		formatId := strconv.FormatInt(*userV.ID, 10)
+		if err != nil {
+			log.GetTextLogger().Warn("error getting userInfo for user: ")
+			continue
+		}
+
+		contributorsId = append(contributorsId, formatId)
+		v := domain.NewContributorValue(contributor, userV)
+		contributorsValue = append(contributorsValue, v)
+
+		bloomCheckBeforePush(v, b)
+	}
+	return &contributorsId
+}
+
+func bloomCheckBeforePush(v *domain.Contributor, b bloom.Client) {
+	formatId := strconv.FormatInt(v.Id, 10)
+	isExist := b.Check(formatId)
+	if !isExist {
+		//log.GetTextLogger().Info("success user: ", v)
+
+		marshal, _ := json.Marshal(v)
+		err := userMessagePusher.KPush(ctx, strconv.Itoa(int(time.Now().Unix())), string(marshal))
+		if err != nil {
+			log.GetTextLogger().Error("error pushing msg,err: ", err.Error())
+		}
+
+		b.Add(formatId)
+	}
+}
+
 // DoCrawl 爬取仓库的主方法
 func (r *repoCrawl) DoCrawl() {
 	registerMessageQueue(r)
@@ -60,7 +99,7 @@ func (r *repoCrawl) DoCrawl() {
 		go func() {
 			defer wg.Done()
 			for {
-				client := tokenManager.GetClient(ctx)
+				client = tokenManager.GetClient(ctx)
 				// 检查限额
 				if tokenManager.CheckRateLimit(client) {
 					log.GetTextLogger().Warn("Token rate limit reached, switching...")
@@ -70,9 +109,12 @@ func (r *repoCrawl) DoCrawl() {
 				repoId := getRepoId()
 				repo, _, err := client.Repositories.GetByID(ctx, repoId)
 				if err != nil || repo == nil {
-					log.GetTextLogger().Warn("Error fetching repository by Id: %v", err)
+					//log.GetTextLogger().Warn("Fetching nil repository by Id: %v", err)
 					continue
 				}
+
+				// 仓库信息与贡献者信息爬取完成，进行初步清洗
+				value := domain.NewRepositoryValue(repo)
 
 				// 获取该项目的所有贡献者
 				var allContributors []*github.Contributor
@@ -81,7 +123,6 @@ func (r *repoCrawl) DoCrawl() {
 						log.GetTextLogger().Warn("Token rate limit reached, switching...")
 						continue
 					}
-
 					opts := &github.ListContributorsOptions{ListOptions: github.ListOptions{PerPage: 100}}
 					contributors, resp, err := client.Repositories.ListContributors(ctx, *repo.Owner.Login, *repo.Name, opts)
 
@@ -96,33 +137,8 @@ func (r *repoCrawl) DoCrawl() {
 					opts.Page = resp.NextPage
 				}
 
-				// 仓库信息与贡献者信息爬取完成，进行初步清洗
-				value := domain.NewRepositoryValue(repo)
-				for _, contributor := range allContributors {
-					formatId := strconv.FormatInt(*contributor.ID, 10)
-
-					*value.ContributorsId = make([]string, len(allContributors))
-					ids := *value.ContributorsId
-
-					ids = append(ids, formatId)
-					value.ContributorsId = &ids
-
-					isExist := r.bloom.Check(formatId)
-					if !isExist {
-						contributorValue := domain.NewContributorValue(contributor)
-
-						log.GetTextLogger().Info("success user: ", strconv.FormatInt(contributorValue.Id, 10))
-						marshal, _ := json.Marshal(contributorValue)
-						err := userMessagePusher.KPush(ctx, strconv.Itoa(int(time.Now().Unix())), string(marshal))
-
-						if err != nil {
-							log.GetTextLogger().Error("error pushing msg,err: ", err.Error())
-						}
-
-						//TODO 布隆过滤器介质更换
-						r.bloom.Add(formatId)
-					}
-				}
+				contributorsInfo := crawlPushContributorsInfo(&allContributors, r.bloom)
+				value.ContributorsId = contributorsInfo
 
 				log.GetTextLogger().Info("success repo: ", strconv.FormatInt(repoId, 10))
 				marshal, _ := jsoniter.Marshal(value)
