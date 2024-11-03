@@ -10,7 +10,6 @@ type Contributor struct {
 	Id             int64
 	AvatarURL      string
 	URL            string
-	Contributions  int
 	HTMLURL        string
 	GravatarID     string
 	Name           string
@@ -19,10 +18,10 @@ type Contributor struct {
 	Location       string
 	Email          string
 	Bio            string
-	PublicRepos    int
-	PublicGists    int
-	FollowerCount  int
-	FollowingCount int
+	PublicRepos    int32
+	PublicGists    int32
+	FollowerCount  int32
+	FollowingCount int32
 	CreatedAt      int64
 	UpdatedAt      int64
 	Type           string
@@ -44,13 +43,12 @@ func NewContributorValue(g *github.Contributor, v *github.User) *Contributor {
 		Login:          *g.Login,
 		Id:             *g.ID,
 		URL:            *g.URL,
-		Contributions:  *g.Contributions,
 		HTMLURL:        *v.HTMLURL,
 		GravatarID:     *v.GravatarID,
-		PublicRepos:    *v.PublicRepos,
-		PublicGists:    *v.PublicGists,
-		FollowerCount:  *v.Followers,
-		FollowingCount: *v.Following,
+		PublicRepos:    int32(*v.PublicRepos),
+		PublicGists:    int32(*v.PublicGists),
+		FollowerCount:  int32(*v.Followers),
+		FollowingCount: int32(*v.Following),
 		CreatedAt:      v.CreatedAt.Unix(),
 		UpdatedAt:      v.UpdatedAt.Unix(),
 		Type:           *v.Type,

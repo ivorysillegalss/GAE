@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"gae-backend-crawl/bootstrap"
 	"gae-backend-crawl/constant/mq"
+	"gae-backend-crawl/constant/sys"
 	"gae-backend-crawl/domain"
 	"gae-backend-crawl/infrastructure/bloom"
 	kq "gae-backend-crawl/infrastructure/kafka"
@@ -39,6 +40,7 @@ var (
 
 func init() {
 	ctx = context.Background()
+	repoId = 1894
 }
 
 // 注册MQ相关队列
@@ -116,6 +118,15 @@ func bloomCheckBeforePush(v *domain.Contributor, b bloom.Client) {
 
 // DoCrawl 爬取仓库的主方法
 func (r *repoCrawl) DoCrawl() {
+	err := r.bloom.LoadFromFile(sys.BloomFilterFileName)
+	if err != nil {
+		log.GetTextLogger().Warn("Error loading bloom filter:", err)
+	} else {
+		log.GetTextLogger().Info("Bloom filter data loaded or new file created.")
+	}
+
+	r.bloom.StartAutoSave(sys.BloomFilterFileName, sys.BloomFlushDuration)
+
 	registerMessageQueue(r)
 	tokenValue := strings.Split(r.env.GithubTokens, ",")
 	tokenManager := NewTokenManager(tokenValue)
@@ -156,7 +167,17 @@ func (r *repoCrawl) DoCrawl() {
 					if err != nil {
 						log.GetTextLogger().Error("error fetching contributors: %v", err)
 					}
+
+					if tokenManager.CheckRateLimit(client) {
+						log.GetTextLogger().Warn("Token rate limit reached, switching...")
+						continue
+					}
+
 					allContributors = append(allContributors, contributors...)
+
+					if resp == nil {
+						continue
+					}
 
 					if resp.NextPage == 0 {
 						break

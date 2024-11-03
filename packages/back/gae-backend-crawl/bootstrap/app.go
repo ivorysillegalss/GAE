@@ -50,7 +50,9 @@ func NewRedisDatabase(env *Env) redis.Client {
 }
 
 func NewBloomFilter() bloom.Client {
-	return bloom.NewBloomClient()
+	n := uint(1000)           // 预计要插入的元素数量
+	falsePositiveRate := 0.01 // 允许的误判率
+	return bloom.NewBloomClient(n, falsePositiveRate)
 }
 
 // PoolsFactory k为pool业务号 v为poll详细配置信息
