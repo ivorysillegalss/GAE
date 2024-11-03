@@ -63,12 +63,39 @@ func crawlPushContributorsInfo(contributors *[]*github.Contributor, b bloom.Clie
 		}
 
 		contributorsId = append(contributorsId, formatId)
+
 		v := domain.NewContributorValue(contributor, userV)
+
+		v.Followers = *crawlContributorFollower(userV.GetLogin())
+		v.Followings = *crawlContributorFollowing(userV.GetLogin())
+
 		contributorsValue = append(contributorsValue, v)
 
 		bloomCheckBeforePush(v, b)
 	}
 	return &contributorsId
+}
+
+func crawlContributorFollower(username string) *[]*github.User {
+	var allFollowers []*github.User
+	opts := &github.ListOptions{PerPage: 100}
+	followers, _, err := client.Users.ListFollowers(ctx, username, opts)
+	if err != nil {
+		log.GetTextLogger().Warn("list followers error for user: " + username)
+	}
+	allFollowers = append(allFollowers, followers...)
+	return &allFollowers
+}
+
+func crawlContributorFollowing(username string) *[]*github.User {
+	var allFollowings []*github.User
+	opts := &github.ListOptions{PerPage: 100}
+	following, _, err := client.Users.ListFollowing(ctx, username, opts)
+	if err != nil {
+		log.GetTextLogger().Warn("list followers error for user: " + username)
+	}
+	allFollowings = append(allFollowings, following...)
+	return &allFollowings
 }
 
 func bloomCheckBeforePush(v *domain.Contributor, b bloom.Client) {
@@ -109,7 +136,7 @@ func (r *repoCrawl) DoCrawl() {
 				repoId := getRepoId()
 				repo, _, err := client.Repositories.GetByID(ctx, repoId)
 				if err != nil || repo == nil {
-					//log.GetTextLogger().Warn("Fetching nil repository by Id: %v", err)
+					log.GetTextLogger().Info("Fetching nil repository by Id: %v", err)
 					continue
 				}
 
