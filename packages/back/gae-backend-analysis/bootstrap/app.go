@@ -4,6 +4,7 @@ import (
 	"gae-backend-analysis/api/controller"
 	"gae-backend-analysis/domain"
 	"gae-backend-analysis/executor"
+	"gae-backend-analysis/infrastructure/elasticsearch"
 	"gae-backend-analysis/infrastructure/mongo"
 	"gae-backend-analysis/infrastructure/mysql"
 	"gae-backend-analysis/infrastructure/pool"
@@ -17,6 +18,7 @@ type Application struct {
 	Channels     *Channels
 	Controllers  *Controllers
 	Executor     *Executor
+	SearchEngine *SearchEngine
 }
 
 type Databases struct {
@@ -46,6 +48,10 @@ type Executor struct {
 	DataExecutor    *executor.DataExecutor
 }
 
+type SearchEngine struct {
+	EsEngine elasticsearch.Client
+}
+
 func (app *Application) CloseDBConnection() {
 	CloseMongoDBConnection(app.Databases.Mongo)
 }
@@ -60,4 +66,8 @@ func NewExecutors(ce *executor.CronExecutor, cse *executor.ConsumeExecutor, de *
 		ConsumeExecutor: cse,
 		DataExecutor:    de,
 	}
+}
+
+func NewSearchEngine(es elasticsearch.Client) *SearchEngine {
+	return &SearchEngine{EsEngine: es}
 }

@@ -28,16 +28,19 @@ func InitializeApp() (*bootstrap.Application, error) {
 	poolsFactory := bootstrap.NewPoolFactory()
 	channels := bootstrap.NewChannel()
 	controllers := bootstrap.NewControllers()
-	generationRepository := repository.NewGenerationRepository(databases)
+	client := bootstrap.NewRedisDatabase(env)
+	talentRepository := repository.NewTalentRepository(client)
+	talentCron := cron.NewTalentCron(talentRepository, poolsFactory)
+	cronExecutor := executor.NewCronExecutor(talentCron)
 	connection := bootstrap.NewRabbitConnection(env)
 	messageHandler := consume.NewMessageHandler(connection)
+	generationRepository := repository.NewGenerationRepository(databases)
 	generateEvent := consume.NewGenerateEvent(messageHandler, env, channels, generationRepository)
-	generationCron := cron.NewGenerationCron(generationRepository, channels, env, generateEvent)
-	cronExecutor := executor.NewCronExecutor(generationCron)
 	consumeExecutor := executor.NewConsumeExecutor(generateEvent)
-	client := bootstrap.NewRedisDatabase(env)
 	dataExecutor := executor.NewDataExecutor(client)
 	bootstrapExecutor := bootstrap.NewExecutors(cronExecutor, consumeExecutor, dataExecutor)
+	elasticsearchClient := bootstrap.NewEsEngine(env)
+	searchEngine := bootstrap.NewSearchEngine(elasticsearchClient)
 	application := &bootstrap.Application{
 		Env:          env,
 		Databases:    databases,
@@ -45,10 +48,11 @@ func InitializeApp() (*bootstrap.Application, error) {
 		Channels:     channels,
 		Controllers:  controllers,
 		Executor:     bootstrapExecutor,
+		SearchEngine: searchEngine,
 	}
 	return application, nil
 }
 
 // wire.go:
 
-var appSet = wire.NewSet(bootstrap.NewEnv, tokenutil.NewTokenUtil, bootstrap.NewDatabases, bootstrap.NewRedisDatabase, bootstrap.NewMysqlDatabase, bootstrap.NewMongoDatabase, bootstrap.NewPoolFactory, bootstrap.NewChannel, bootstrap.NewRabbitConnection, bootstrap.NewControllers, bootstrap.NewExecutors, repository.NewGenerationRepository, repository.NewChatRepository, repository.NewBotRepository, consume.NewStorageEvent, consume.NewGenerateEvent, consume.NewMessageHandler, cron.NewGenerationCron, executor.NewCronExecutor, executor.NewConsumeExecutor, executor.NewDataExecutor, usecase.NewChatUseCase, task.NewAskChatTask, task.NewChatTitleTask, task.NewConvertTask, controller.NewTestController, wire.Struct(new(bootstrap.Application), "*"))
+var appSet = wire.NewSet(bootstrap.NewEnv, tokenutil.NewTokenUtil, bootstrap.NewDatabases, bootstrap.NewRedisDatabase, bootstrap.NewMysqlDatabase, bootstrap.NewMongoDatabase, bootstrap.NewPoolFactory, bootstrap.NewChannel, bootstrap.NewRabbitConnection, bootstrap.NewControllers, bootstrap.NewExecutors, bootstrap.NewKafkaConf, bootstrap.NewEsEngine, bootstrap.NewSearchEngine, repository.NewGenerationRepository, repository.NewChatRepository, repository.NewBotRepository, repository.NewTalentRepository, consume.NewTalentEvent, consume.NewStorageEvent, consume.NewGenerateEvent, consume.NewMessageHandler, cron.NewGenerationCron, cron.NewTalentCron, executor.NewCronExecutor, executor.NewConsumeExecutor, executor.NewDataExecutor, usecase.NewChatUseCase, task.NewAskChatTask, task.NewChatTitleTask, task.NewConvertTask, controller.NewTestController, wire.Struct(new(bootstrap.Application), "*"))

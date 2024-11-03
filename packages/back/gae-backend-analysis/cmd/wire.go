@@ -30,6 +30,8 @@ var appSet = wire.NewSet(
 	bootstrap.NewControllers,
 	bootstrap.NewExecutors,
 	bootstrap.NewKafkaConf,
+	bootstrap.NewEsEngine,
+	bootstrap.NewSearchEngine,
 
 	repository.NewGenerationRepository,
 	repository.NewChatRepository,

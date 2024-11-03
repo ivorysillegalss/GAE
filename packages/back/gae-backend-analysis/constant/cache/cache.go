@@ -46,9 +46,19 @@ const (
 )
 
 const (
-	TemporaryUnRankCleansingShardList     = "UnRankCleansingList"
-	TemporaryUnRankCleansingShardMaxValue = 100
-	TemporaryUnRankCleansingData          = "UnRankCleansing"
-	TemporaryUnRankCleansingShard         = "shard"
-	TemporaryUnRankCleansingReadyShard    = "UnRankCleansingReadyShardList"
+	// TemporaryUnRankCleansingRepoShardList  此处数据全部代指仓库数据
+	TemporaryUnRankCleansingRepoShardList     = "UnRankCleansingRepoList"
+	TemporaryUnRankCleansingRepoShardMaxValue = 100
+	TemporaryUnRankCleansingRepoData          = "UnRankCleansingRepo"
+	TemporaryUnRankCleansingRepoShard         = "shard"
+	TemporaryUnRankCleansingRepoReadyShard    = "UnRankCleansingReadyRepoShardList"
+)
+
+const (
+	// TemporaryUnRankCleansingContributorShardList 代指贡献者的数据
+	TemporaryUnRankCleansingContributorShardList     = "UnRankCleansingContributorList"
+	TemporaryUnRankCleansingContributorShardMaxValue = 100
+	TemporaryUnRankCleansingContributorData          = "UnRankCleansingContributor"
+	TemporaryUnRankCleansingContributorShard         = "shard"
+	TemporaryUnRankCleansingContributorReadyShard    = "UnRankCleansingReadyContributorShardList"
 )
