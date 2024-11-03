@@ -19,10 +19,6 @@ type ChatTitleTask struct {
 	channels       *bootstrap.Channels
 }
 
-func NewChatTitleTask(c domain.ChatRepository, env *bootstrap.Env, cn *bootstrap.Channels) TitleTask {
-	return &ChatTitleTask{chatRepository: c, env: env, channels: cn}
-}
-
 func (c ChatTitleTask) InitContextData(args ...any) *taskchain.TaskContext {
 	userId := args[0].(int)
 	chatId := args[2].(int)

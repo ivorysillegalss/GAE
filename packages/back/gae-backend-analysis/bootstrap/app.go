@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"gae-backend-analysis/api/controller"
 	"gae-backend-analysis/domain"
 	"gae-backend-analysis/executor"
 	"gae-backend-analysis/infrastructure/elasticsearch"
@@ -39,7 +38,6 @@ type Channels struct {
 }
 
 type Controllers struct {
-	TestController *controller.TestController
 }
 
 type Executor struct {

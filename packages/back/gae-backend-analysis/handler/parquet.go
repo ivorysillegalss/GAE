@@ -29,8 +29,6 @@ func NewIntermediateHandler() IntermediateHandler {
 // IntermediateHandler 中间存储的实现方式是Parquet
 type IntermediateHandler interface {
 	WriteData(talent domain.Talent, businessId int)
-	//ReadContributorData(filePath string) []domain.Talent
-	//ReadRepoData(filePath string) []domain.Talent
 	ReadData(filePath string, businessId int) *domain.Talent
 	GetIndex(businessId int) int
 }
@@ -43,6 +41,10 @@ func (p *ParquetHandler) WriteData(any domain.Talent, businessId int) {
 
 	switch businessId {
 	case mq.UnCleansingRepoId:
+		if any.Repos == nil {
+			log.GetTextLogger().Warn("nil data file")
+			return
+		}
 		repoMutex.Lock()
 		defer repoMutex.Unlock()
 
@@ -50,6 +52,10 @@ func (p *ParquetHandler) WriteData(any domain.Talent, businessId int) {
 		filePath = dao.RepoPrefix + common.UnderScore + dao.OutputFilepath + common.UnderScore + strconv.FormatInt(index, 10) + dao.ParquetSuffix
 
 	case mq.UnCleansingUserId:
+		if any.Contributors == nil {
+			log.GetTextLogger().Warn("nil data file")
+			return
+		}
 		userMutex.Lock()
 		defer userMutex.Unlock()
 		index := atomic.AddInt64(&userIndex, 1)
@@ -67,7 +73,7 @@ func (p *ParquetHandler) WriteData(any domain.Talent, businessId int) {
 	switch businessId {
 	case mq.UnCleansingUserId:
 		// 创建 Parquet Writer
-		pw, err := writer.NewParquetWriter(f, any.Contributors, dao.ParquetDefaultGoroutine)
+		pw, err := writer.NewParquetWriter(f, new(domain.Contributor), dao.ParquetDefaultGoroutine)
 		if err != nil {
 			log.GetTextLogger().Warn("Error creating Parquet writer for %s: %v", filePath, err)
 			return
@@ -85,7 +91,7 @@ func (p *ParquetHandler) WriteData(any domain.Talent, businessId int) {
 
 	case mq.UnCleansingRepoId:
 		// 创建 Parquet Writer
-		pw, err := writer.NewParquetWriter(f, any.Repos, dao.ParquetDefaultGoroutine)
+		pw, err := writer.NewParquetWriter(f, new(domain.Repo), dao.ParquetDefaultGoroutine)
 		if err != nil {
 			log.GetTextLogger().Warn("Error creating Parquet writer for %s: %v", filePath, err)
 			return
@@ -131,8 +137,8 @@ func (p *ParquetHandler) ReadContributorData(filePath string) []domain.Talent {
 //
 //	filePath := dao.OutputFilepath + common.UnderScore + strconv.Itoa(getParquetIndex()) + dao.ParquetSuffix
 func (p *ParquetHandler) ReadData(filePath string, businessId int) *domain.Talent {
-	var contributors []domain.Contributor
-	var repos []domain.Repo
+	var contributors []*domain.Contributor
+	var repos []*domain.Repo
 
 	switch businessId {
 	case mq.UnCleansingUserId:
@@ -146,7 +152,7 @@ func (p *ParquetHandler) ReadData(filePath string, businessId int) *domain.Talen
 
 		num := int(parquetReader.GetNumRows())
 		for j := 0; j < num; j++ {
-			var talentBatch []domain.Contributor
+			var talentBatch []*domain.Contributor
 			if err := parquetReader.Read(&talentBatch); err != nil {
 				log.GetTextLogger().Error("Read error for file %s: %v", filePath, err)
 				break
@@ -165,7 +171,7 @@ func (p *ParquetHandler) ReadData(filePath string, businessId int) *domain.Talen
 
 		num := int(parquetReader.GetNumRows())
 		for j := 0; j < num; j++ {
-			var talentBatch []domain.Repo
+			var talentBatch []*domain.Repo
 			if err := parquetReader.Read(&talentBatch); err != nil {
 				log.GetTextLogger().Error("Read error for file %s: %v", filePath, err)
 				break

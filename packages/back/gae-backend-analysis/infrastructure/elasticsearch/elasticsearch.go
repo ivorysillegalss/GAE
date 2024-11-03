@@ -26,6 +26,7 @@ type Client interface {
 func NewElasticSearchClient() (Client, error) {
 	client, err := elastic.NewClient(
 		elastic.SetURL(dao.EsUrl),
+		elastic.SetSniff(false),
 	)
 	if err != nil {
 		log.GetTextLogger().Fatal(err.Error())

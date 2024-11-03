@@ -28,7 +28,7 @@ const (
 
 // TODO MOVE，可配置化，elastic的配置项
 const (
-	EsUrl = "http://127.0.0.1:9200"
+	EsUrl = "http://localhost:9200"
 )
 
 const (

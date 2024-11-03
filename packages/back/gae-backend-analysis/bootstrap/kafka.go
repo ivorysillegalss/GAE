@@ -9,15 +9,19 @@ import (
 func initKafkaConf(*Env) map[int]kq.KqConf {
 	m := new(map[int]kq.KqConf)
 	confM := *m
+	//TODO modified map size
+	confM = make(map[int]kq.KqConf, 10)
 	conf := kq.KqConf{
 		ServiceConf: service.ServiceConf{
 			Name: mq.UnRankCleansingService,
 		},
-		Brokers: []string{mq.KafkaDefaultLocalBroker},
-		Group:   mq.UnRankCleansingGroup,
-		Topic:   mq.UnRankCleansingTopic,
-		Offset:  mq.FirstOffset,
-		Conns:   1,
+		Brokers:    []string{mq.KafkaDefaultLocalBroker},
+		Group:      mq.UnRankCleansingGroup,
+		Topic:      mq.UnRankCleansingTopic,
+		Offset:     mq.FirstOffset,
+		Conns:      1,
+		Processors: 1,
+		Consumers:  1,
 	}
 	confM[mq.UnRankCleansingServiceId] = conf
 
@@ -26,11 +30,13 @@ func initKafkaConf(*Env) map[int]kq.KqConf {
 		ServiceConf: service.ServiceConf{
 			Name: "gaeUnCleansingRepoService",
 		},
-		Brokers: []string{mq.KafkaDefaultLocalBroker},
-		Group:   mq.UnCleansingRepoGroup,
-		Topic:   mq.UnCleansingRepoTopic,
-		Offset:  mq.FirstOffset,
-		Conns:   1,
+		Brokers:    []string{mq.KafkaDefaultLocalBroker},
+		Group:      mq.UnCleansingRepoGroup,
+		Topic:      mq.UnCleansingRepoTopic,
+		Offset:     mq.FirstOffset,
+		Conns:      1,
+		Processors: 1,
+		Consumers:  1,
 	}
 
 	confM[mq.UnCleansingRepoId] = UnCleansingRepoGroup
@@ -40,11 +46,13 @@ func initKafkaConf(*Env) map[int]kq.KqConf {
 		ServiceConf: service.ServiceConf{
 			Name: "gaeUnCleansingUserService",
 		},
-		Brokers: []string{mq.KafkaDefaultLocalBroker},
-		Group:   mq.UnCleansingUserGroup,
-		Topic:   mq.UnCleansingUserTopic,
-		Offset:  mq.FirstOffset,
-		Conns:   1,
+		Brokers:    []string{mq.KafkaDefaultLocalBroker},
+		Group:      mq.UnCleansingUserGroup,
+		Topic:      mq.UnCleansingUserTopic,
+		Offset:     mq.FirstOffset,
+		Conns:      1,
+		Processors: 1,
+		Consumers:  1,
 	}
 
 	confM[mq.UnCleansingUserId] = UnCleansingUserGroup

@@ -13,13 +13,10 @@ import (
 	"gae-backend-analysis/infrastructure/lru"
 	"gae-backend-analysis/infrastructure/mysql"
 	"gae-backend-analysis/infrastructure/redis"
-	"gae-backend-analysis/internal/compressutil"
-	__proto "gae-backend-analysis/proto/.proto"
 	"github.com/jinzhu/gorm"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/thoas/go-funk"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -35,7 +32,6 @@ type chatRepository struct {
 
 type historySerializer struct {
 	gzipRecord *[]*domain.Record
-	pbRecord   *[]*__proto.Record
 }
 
 func NewChatRepository(dbs *bootstrap.Databases, env *bootstrap.Env) domain.ChatRepository {
@@ -103,10 +99,6 @@ func (c *chatRepository) CacheGetHistory(ctx context.Context, chatId int, botId 
 func (c *chatRepository) AsyncSaveHistory(ctx context.Context, chatId int, askText string, generationText string, botId int) {
 
 	switch botId2TableMap[botId] {
-	case dao.OriginTable:
-		originTableSaveHistory(c.mysql.Gorm(), chatId, askText, generationText)
-	case dao.RefactorTable:
-		refactorTableSaveHistory(c.mysql.Gorm(), chatId, askText, generationText, c.env)
 	default:
 		log.GetTextLogger().Error("get wrong botId mapping table type")
 	}
@@ -149,56 +141,6 @@ func originTableSaveHistory(db *gorm.DB, chatId int, askText string, generationT
 	}
 	if err := db.Table("chat").Where("chat_id = ?", chatId).Update("last_update_time", time.Now().Unix()).Error; err != nil {
 		log.GetTextLogger().Error(err.Error())
-	}
-}
-
-func refactorTableSaveHistory(db *gorm.DB, chatId int, askText string, generationText string, env *bootstrap.Env) {
-	history, _, err := refactorTableGetHistory(db, chatId, env)
-	if err != nil {
-		log.GetJsonLogger().WithFields("async history", err.Error()).Warn("async history error")
-		panic(err)
-	}
-
-	var marshal []byte
-	switch env.Serializer {
-	case sys.GzipCompress:
-		r := &domain.Record{
-			ChatAsks:        &domain.ChatAsk{Message: askText},
-			ChatGenerations: &domain.ChatGeneration{Message: generationText},
-		}
-		var records []*domain.Record
-		records = make([]*domain.Record, 0)
-		records = append(records, r)
-		if funk.NotEmpty(history) {
-			*history.gzipRecord = append(*history.gzipRecord, records...)
-		} else {
-			history.gzipRecord = &records
-		}
-		marshal, err = compressutil.NewCompress(sys.GzipCompress).CompressData(*history.gzipRecord)
-		if err != nil {
-			panic(err)
-		}
-	case sys.ProtoBufCompress:
-		r := &__proto.Record{
-			ChatAsks:        &__proto.ChatAsk{Message: askText},
-			ChatGenerations: &__proto.ChatGeneration{Message: generationText},
-		}
-		var records []*__proto.Record
-		records = make([]*__proto.Record, 0)
-		records = append(records, r)
-		if funk.NotEmpty(history) {
-			*history.pbRecord = append(*history.pbRecord, records...)
-		} else {
-			history.pbRecord = &records
-		}
-		marshal, err = compressutil.NewCompress(sys.ProtoBufCompress).CompressData(*history.pbRecord)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	if err = db.Table("chat_re").Where("chat_id = ?", chatId).Update("data", marshal).Error; err != nil {
-		panic(err)
 	}
 }
 
@@ -325,19 +267,6 @@ func (c *chatRepository) DbGetHistory(ctx context.Context, chatId int, botId int
 
 		//如果是新表 根据系统配置的序列化方式 选择gzip or protobuf
 		switch c.env.Serializer {
-		case sys.GzipCompress:
-			getHistory, s, err := refactorTableGetHistory(c.mysql.Gorm(), chatId, c.env)
-			if funk.IsEmpty(getHistory) {
-				getHistory = new(historySerializer)
-			}
-			return getHistory.gzipRecord, s, err
-		case sys.ProtoBufCompress:
-			getHistory, s, err := refactorTableGetHistory(c.mysql.Gorm(), chatId, c.env)
-			if funk.IsEmpty(getHistory) {
-				return nil, s, err
-			}
-			history2Domain := convertPbHistory2Domain(getHistory)
-			return &history2Domain, s, err
 		default:
 			log.GetTextLogger().Fatal("error Compress sign")
 			panic("error Compress sign")
@@ -352,108 +281,9 @@ func (c *chatRepository) DbGetHistory(ctx context.Context, chatId int, botId int
 
 }
 
-// 使用带缓冲区channel 将历史记录切片依次切换
-func convertPbHistory2Domain(h *historySerializer) []*domain.Record {
-	pbRecords := *h.pbRecord
-	domainRecords := make([]*domain.Record, len(pbRecords))
-	var wg sync.WaitGroup
-
-	// 创建一个带缓冲区的 channel，容量等于 pbRecords 长度
-	results := make(chan struct {
-		index  int
-		record *domain.Record
-	}, len(pbRecords))
-
-	for i, pbRecord := range pbRecords {
-		wg.Add(1)
-		pbRecord := pbRecord
-		i := i
-		go func() {
-			defer wg.Done()
-			domainRecord := convertToDomainRecord(pbRecord)
-			results <- struct {
-				index  int
-				record *domain.Record
-			}{i, domainRecord} // 将结果发送到 channel
-		}()
-	}
-
-	// 另一个 goroutine 等待所有任务完成后关闭 channel
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	// 从 channel 中读取结果并写入切片
-	for result := range results {
-		domainRecords[result.index] = result.record
-	}
-
-	return domainRecords
-}
-
-func convertToDomainRecord(record *__proto.Record) *domain.Record {
-	asks := record.ChatAsks
-	generations := record.ChatGenerations
-	return &domain.Record{
-		RecordId: int(record.RecordId),
-		ChatAsks: &domain.ChatAsk{
-			ChatId:  int(asks.ChatId),
-			Message: asks.Message,
-			BotId:   int(asks.BotId),
-			Time:    asks.Time,
-		},
-		ChatGenerations: &domain.ChatGeneration{
-			Message: generations.Message,
-			Time:    generations.Time,
-		},
-	}
-}
-
 type historyData struct {
 	Data  []byte `gorm:"column:data"`
 	Title string `gorm:"column:title"`
-}
-
-// refactorTableGetHistory  重构后的新表获取记录的方法
-func refactorTableGetHistory(db *gorm.DB, chatId int, env *bootstrap.Env) (*historySerializer, string, error) {
-	var h []*historyData
-
-	if err := db.Table("chat_re").Where("chat_id = ?", chatId).
-		Select("data,title").
-		Scan(&h).
-		Error; err != nil {
-		return nil, common.ZeroString, err
-	}
-
-	if funk.IsEmpty(h) {
-		return nil, common.ZeroString, nil
-	}
-
-	var err error
-	var gzipHistory []*domain.Record
-	var pbHistory []*__proto.Record
-	var hs historySerializer
-	switch env.Serializer {
-	case sys.GzipCompress:
-		err = compressutil.NewCompress(sys.GzipCompress).DecompressData(h[0].Data, &gzipHistory)
-		hs.gzipRecord = &gzipHistory
-	case sys.ProtoBufCompress:
-		if funk.IsEmpty(h[0].Data) {
-			return &hs, h[0].Title, nil
-		}
-		err = compressutil.NewCompress(sys.ProtoBufCompress).DecompressData(h[0].Data, &pbHistory)
-		hs.pbRecord = &pbHistory
-	default:
-		log.GetTextLogger().Fatal("error Compress sign")
-		panic("error Compress sign")
-	}
-
-	if err != nil {
-		return nil, common.ZeroString, err
-	}
-
-	return &hs, h[0].Title, nil
 }
 
 // TODO 得测，重写
@@ -500,10 +330,7 @@ func (c *chatRepository) DbInsertNewChat(ctx context.Context, userId int, botId 
 	var data []byte
 	switch c.env.Serializer {
 	case sys.GzipCompress:
-		marshal, _ := jsoniter.Marshal(dao.DefaultData)
-		data, _ = compressutil.NewCompress(sys.GzipCompress).CompressData(marshal)
 	case sys.ProtoBufCompress:
-		data, _ = compressutil.NewCompress(sys.ProtoBufCompress).CompressData(&__proto.Record{})
 	}
 	chat := &domain.Chat{
 		UserId:         userId,

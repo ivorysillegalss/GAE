@@ -7,7 +7,6 @@
 package main
 
 import (
-	"gae-backend-analysis/api/controller"
 	"gae-backend-analysis/bootstrap"
 	"gae-backend-analysis/consume"
 	"gae-backend-analysis/cron"
@@ -35,8 +34,10 @@ func InitializeApp() (*bootstrap.Application, error) {
 	connection := bootstrap.NewRabbitConnection(env)
 	messageHandler := consume.NewMessageHandler(connection)
 	generationRepository := repository.NewGenerationRepository(databases)
+	conf := bootstrap.NewKafkaConf(env)
 	generateEvent := consume.NewGenerateEvent(messageHandler, env, channels, generationRepository)
-	consumeExecutor := executor.NewConsumeExecutor(generateEvent)
+	talentEvent := consume.NewTalentEvent(env, conf, talentRepository)
+	consumeExecutor := executor.NewConsumeExecutor(generateEvent, talentEvent)
 	dataExecutor := executor.NewDataExecutor(client)
 	bootstrapExecutor := bootstrap.NewExecutors(cronExecutor, consumeExecutor, dataExecutor)
 	elasticsearchClient := bootstrap.NewEsEngine(env)
@@ -55,4 +56,4 @@ func InitializeApp() (*bootstrap.Application, error) {
 
 // wire.go:
 
-var appSet = wire.NewSet(bootstrap.NewEnv, tokenutil.NewTokenUtil, bootstrap.NewDatabases, bootstrap.NewRedisDatabase, bootstrap.NewMysqlDatabase, bootstrap.NewMongoDatabase, bootstrap.NewPoolFactory, bootstrap.NewChannel, bootstrap.NewRabbitConnection, bootstrap.NewControllers, bootstrap.NewExecutors, bootstrap.NewKafkaConf, bootstrap.NewEsEngine, bootstrap.NewSearchEngine, repository.NewGenerationRepository, repository.NewChatRepository, repository.NewBotRepository, repository.NewTalentRepository, consume.NewTalentEvent, consume.NewStorageEvent, consume.NewGenerateEvent, consume.NewMessageHandler, cron.NewGenerationCron, cron.NewTalentCron, executor.NewCronExecutor, executor.NewConsumeExecutor, executor.NewDataExecutor, usecase.NewChatUseCase, task.NewAskChatTask, task.NewChatTitleTask, task.NewConvertTask, controller.NewTestController, wire.Struct(new(bootstrap.Application), "*"))
+var appSet = wire.NewSet(bootstrap.NewEnv, tokenutil.NewTokenUtil, bootstrap.NewDatabases, bootstrap.NewRedisDatabase, bootstrap.NewMysqlDatabase, bootstrap.NewMongoDatabase, bootstrap.NewPoolFactory, bootstrap.NewChannel, bootstrap.NewRabbitConnection, bootstrap.NewControllers, bootstrap.NewExecutors, bootstrap.NewKafkaConf, bootstrap.NewEsEngine, bootstrap.NewSearchEngine, repository.NewGenerationRepository, repository.NewChatRepository, repository.NewBotRepository, repository.NewTalentRepository, consume.NewTalentEvent, consume.NewStorageEvent, consume.NewGenerateEvent, consume.NewMessageHandler, cron.NewGenerationCron, cron.NewTalentCron, executor.NewCronExecutor, executor.NewConsumeExecutor, executor.NewDataExecutor, usecase.NewChatUseCase, task.NewAskChatTask, task.NewConvertTask, wire.Struct(new(bootstrap.Application), "*"))

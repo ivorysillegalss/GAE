@@ -18,7 +18,7 @@ func Setup(c *bootstrap.Controllers, e *bootstrap.Executor) *gin.Engine {
 	//Consume Start
 	e.ConsumeExecutor.SetupConsume()
 	//InitRedis start
-	e.DataExecutor.InitData()
+	//e.DataExecutor.InitData()
 
 	return r
 }

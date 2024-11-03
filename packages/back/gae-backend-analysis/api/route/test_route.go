@@ -6,6 +6,5 @@ import (
 )
 
 func RegisterTestRouter(router *gin.RouterGroup, c *bootstrap.Controllers) {
-	testGroup := router.Group("/test")
-	testGroup.GET("", c.TestController.TestApi)
+
 }

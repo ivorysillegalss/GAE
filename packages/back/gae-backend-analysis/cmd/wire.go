@@ -5,7 +5,6 @@
 package main
 
 import (
-	"gae-backend-analysis/api/controller"
 	"gae-backend-analysis/bootstrap"
 	"gae-backend-analysis/consume"
 	"gae-backend-analysis/cron"
@@ -53,10 +52,7 @@ var appSet = wire.NewSet(
 	usecase.NewChatUseCase,
 
 	task.NewAskChatTask,
-	task.NewChatTitleTask,
 	task.NewConvertTask,
-
-	controller.NewTestController,
 
 	wire.Struct(new(bootstrap.Application), "*"),
 )
