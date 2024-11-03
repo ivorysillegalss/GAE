@@ -6,6 +6,7 @@ require (
 	github.com/bits-and-blooms/bloom/v3 v3.7.0
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/wire v0.6.0
+	github.com/json-iterator/go v1.1.12
 	github.com/mattn/go-colorable v0.1.13
 	github.com/panjf2000/ants/v2 v2.10.0
 	github.com/redis/go-redis/v9 v9.7.0
@@ -34,6 +35,8 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openzipkin/zipkin-go v0.4.3 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
