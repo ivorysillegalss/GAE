@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"gae-backend-web/api/controller"
 	"gae-backend-web/executor"
 	"gae-backend-web/infrastructure/elasticsearch"
 	"gae-backend-web/infrastructure/mongo"
@@ -35,6 +36,7 @@ type Channels struct {
 }
 
 type Controllers struct {
+	RankController *controller.RankController
 }
 
 type Executor struct {
@@ -50,8 +52,8 @@ func (app *Application) CloseDBConnection() {
 	CloseMongoDBConnection(app.Databases.Mongo)
 }
 
-func NewControllers() *Controllers {
-	return &Controllers{}
+func NewControllers(rc *controller.RankController) *Controllers {
+	return &Controllers{RankController: rc}
 }
 
 func NewExecutors(ce *executor.CronExecutor, cse *executor.ConsumeExecutor) *Executor {

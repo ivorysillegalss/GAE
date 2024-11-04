@@ -59,7 +59,7 @@ func (r *redisLuaLruZSet) isExist(ctx context.Context, k string, member string) 
 }
 
 func (r *redisLuaLruZSet) List(ctx context.Context, k string) ([]string, error) {
-	return r.rcl.ZRange(ctx, k)
+	return r.rcl.ZRangeAll(ctx, k)
 }
 
 func (r *redisLuaLruZSet) Add(ctx context.Context, key, value string) (error, int) {

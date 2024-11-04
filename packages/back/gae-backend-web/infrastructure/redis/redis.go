@@ -16,6 +16,7 @@ type Client interface {
 	Get(ctx context.Context, k string) (string, error)
 
 	LRange(ctx context.Context, k string, start int, end int) ([]string, error)
+	LRangeAll(ctx context.Context, k string) ([]string, error)
 	LRem(ctx context.Context, k string, count int, v any) (int64, error)
 	LPush(ctx context.Context, k string, v any) error
 	RPop(ctx context.Context, k string) (string, error)
@@ -23,7 +24,8 @@ type Client interface {
 	ZRem(ctx context.Context, k string, vs ...any) (int64, error)
 	// ZScore 获取指定元素的分数 Zset
 	ZScore(ctx context.Context, k string, member string) (isExist bool, score int)
-	ZRange(ctx context.Context, k string) ([]string, error)
+	ZRangeAll(ctx context.Context, k string) ([]string, error)
+	ZRange(ctx context.Context, k string, start int, end int) ([]string, error)
 
 	SetStruct(ctx context.Context, k string, vStruct any) error
 	SetStructExpire(ctx context.Context, k string, vStruct any, ddl time.Duration) error
@@ -86,6 +88,10 @@ func (r *redisClient) LRange(ctx context.Context, k string, start int, end int) 
 	return r.rcl.LRange(ctx, k, int64(start), int64(end)).Result()
 }
 
+func (r *redisClient) LRangeAll(ctx context.Context, k string) ([]string, error) {
+	return r.LRange(ctx, k, 0, -1)
+}
+
 func (r *redisClient) LPush(ctx context.Context, k string, v any) error {
 	return r.rcl.LPush(ctx, k, v).Err()
 }
@@ -131,8 +137,12 @@ func (r *redisClient) ZScore(ctx context.Context, k string, member string) (isEx
 	return true, int(result)
 }
 
-func (r *redisClient) ZRange(ctx context.Context, k string) ([]string, error) {
+func (r *redisClient) ZRangeAll(ctx context.Context, k string) ([]string, error) {
 	return r.rcl.ZRange(ctx, k, 0, -1).Result()
+}
+
+func (r *redisClient) ZRange(ctx context.Context, k string, start int, end int) ([]string, error) {
+	return r.rcl.ZRange(ctx, k, int64(start), int64(end)).Result()
 }
 
 func (r *redisClient) LRem(ctx context.Context, k string, count int, v any) (int64, error) {

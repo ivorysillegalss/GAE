@@ -9,3 +9,9 @@ const (
 	// LruPrefix LRU前缀缓存
 	LruPrefix = "lru"
 )
+
+const (
+	HotRankPerPage = 30
+	HotRankPhase   = "RankPhase"
+	HotRankPrefix  = "HotRank"
+)

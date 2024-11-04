@@ -21,6 +21,8 @@ const mapping = `
 type Client interface {
 	Ping(esUrl string) (int, error)
 	AddDoc(index string, data any) (bool, error)
+	QueryDoc(index string, field string, filter elastic.Query, sort string, page int, limit int) (interface{}, error)
+	GetClient() *elastic.Client
 }
 
 func NewElasticSearchClient(esUrl string) (Client, error) {
@@ -52,6 +54,10 @@ type esClient struct {
 	es *elastic.Client
 }
 
+func (es *esClient) GetClient() *elastic.Client {
+	return es.es
+}
+
 func addIndex(es *elastic.Client, index string, mapping string) bool {
 	exists, _ := checkIndex(es, index)
 	//不存在对应的索引
@@ -74,23 +80,6 @@ func checkIndex(es *elastic.Client, index string) (bool, error) {
 	}
 	return exists, nil
 
-}
-
-func (es *esClient) AddDoc(index string, data any) (bool, error) {
-	exist, err := checkIndex(es.es, index)
-	if err != nil {
-		log.GetTextLogger().Fatal("create index error,error is: %v", err.Error())
-		return false, err
-	}
-
-	if !exist {
-		log.GetTextLogger().Fatal("cannot find target index: %v", err.Error())
-	}
-	_, err = es.es.Index().Index(index).BodyJson(data).Do(ctx)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
 }
 
 func (es *esClient) Ping(esUrl string) (int, error) {

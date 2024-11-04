@@ -5,10 +5,13 @@
 package main
 
 import (
+	"gae-backend-web/api/controller"
 	"gae-backend-web/bootstrap"
 	"gae-backend-web/consume"
 	"gae-backend-web/executor"
 	"gae-backend-web/internal/tokenutil"
+	"gae-backend-web/repository"
+	"gae-backend-web/usecase"
 	"github.com/google/wire"
 )
 
@@ -26,6 +29,10 @@ var appSet = wire.NewSet(
 	bootstrap.NewKafkaConf,
 	bootstrap.NewEsEngine,
 	bootstrap.NewSearchEngine,
+
+	usecase.NewRankUsecase,
+	repository.NewRankRepository,
+	controller.NewRankController,
 
 	consume.NewTalentEvent,
 

@@ -11,7 +11,7 @@ func Setup(c *bootstrap.Controllers, e *bootstrap.Executor) *gin.Engine {
 
 	publicRouter := r.Group("/api")
 	// All Public APIs
-	RegisterTestRouter(publicRouter, c)
+	RegisterRankRouter(publicRouter, c)
 
 	return r
 }
