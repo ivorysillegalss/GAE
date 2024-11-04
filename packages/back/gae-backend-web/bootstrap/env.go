@@ -33,8 +33,10 @@ type Env struct {
 	KafkaConsumers  int    `mapstructure:"KAFKA_CONSUMERS"`
 	KafkaConns      int    `mapstructure:"KAFKA_CONN"`
 
-	JwtSecretToken     string `mapstructure:"JWT_SECRET_KEY"`
-	ApiOpenaiSecretKey string `mapstructure:"API_OPENAI_SECRET_KEY"`
+	HiveUrl  string `mapstructure:"HIVE_URL"`
+	HIvePort int    `mapstructure:"HIVE_PORT"`
+
+	JwtSecretToken string `mapstructure:"JWT_SECRET_KEY"`
 
 	Serializer string `mapstructure:"SERIALIZER"`
 }

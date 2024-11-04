@@ -29,6 +29,7 @@ var appSet = wire.NewSet(
 	bootstrap.NewKafkaConf,
 	bootstrap.NewEsEngine,
 	bootstrap.NewSearchEngine,
+	bootstrap.NewHiveDBConnection,
 
 	usecase.NewRankUsecase,
 	repository.NewRankRepository,

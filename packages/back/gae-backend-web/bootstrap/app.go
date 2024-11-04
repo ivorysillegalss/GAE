@@ -4,6 +4,7 @@ import (
 	"gae-backend-web/api/controller"
 	"gae-backend-web/executor"
 	"gae-backend-web/infrastructure/elasticsearch"
+	"gae-backend-web/infrastructure/hive"
 	"gae-backend-web/infrastructure/mongo"
 	"gae-backend-web/infrastructure/mysql"
 	"gae-backend-web/infrastructure/pool"
@@ -24,6 +25,7 @@ type Databases struct {
 	Mongo mongo.Client
 	Redis redis.Client
 	Mysql mysql.Client
+	Hive  hive.Client
 }
 
 // PoolsFactory k为pool业务号 v为poll详细配置信息

@@ -7,3 +7,7 @@ const (
 	ParquetSuffix           = ".parquet"
 	ParquetDefaultGoroutine = 4
 )
+
+const (
+	HiveNoneAuth = "NOSASL"
+)
