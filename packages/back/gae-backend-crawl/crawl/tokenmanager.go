@@ -50,6 +50,7 @@ func (tm *TokenManager) getCurrentToken() string {
 			return token
 		}
 		tm.current = (tm.current + 1) % len(tm.tokens)
+		time.Sleep(2 * time.Second)
 	}
 }
 
