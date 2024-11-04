@@ -32,7 +32,11 @@ var appSet = wire.NewSet(
 	bootstrap.NewHiveDBConnection,
 
 	usecase.NewRankUsecase,
+	usecase.NewUsecase,
+
 	repository.NewRankRepository,
+	repository.NewUserRepository,
+
 	controller.NewRankController,
 
 	consume.NewTalentEvent,

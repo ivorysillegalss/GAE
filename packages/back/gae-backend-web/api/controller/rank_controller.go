@@ -11,6 +11,7 @@ import (
 
 type RankController struct {
 	rankUsecase domain.RankUsecase
+	userUsecase domain.UserUsecase
 }
 
 func NewRankController(ru domain.RankUsecase) *RankController {
@@ -49,7 +50,13 @@ func (r *RankController) GetUserRank(c *gin.Context) {
 }
 
 func (r *RankController) GetSpecificInfo(c *gin.Context) {
-
+	usernameParam := c.Param("username")
+	contributorsInfo := r.userUsecase.QueryUserSpecificInfo(usernameParam)
+	if funk.IsEmpty(contributorsInfo) || len(*contributorsInfo) == 0 {
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Code: request.GetError})
+	} else {
+		c.JSON(http.StatusOK, domain.SuccessResponse{Code: request.GetSuccess, Data: contributorsInfo})
+	}
 }
 
 func (r *RankController) CompareInfo(c *gin.Context) {
