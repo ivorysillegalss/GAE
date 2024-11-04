@@ -32,10 +32,15 @@ type ContributorInfo struct {
 
 type Language struct {
 	Name   string
-	amount int
+	Amount int
 }
 
-func NewRepositoryValue(repo *github.Repository) *RepositoryValue {
+func NewRepositoryValue(repo *github.Repository, languages map[string]int) *RepositoryValue {
+	var langList []Language
+	for name, amount := range languages {
+		langList = append(langList, Language{Name: name, Amount: amount})
+	}
+
 	return &RepositoryValue{
 		RepoId:           *repo.ID,
 		OwnerName:        *repo.Owner.Login,
@@ -51,6 +56,7 @@ func NewRepositoryValue(repo *github.Repository) *RepositoryValue {
 		SubscribersCount: *repo.SubscribersCount,
 		WatchersCount:    *repo.WatchersCount,
 		ContributorsId:   new([]string),
+		Languages:        &langList,
 	}
 }
 

@@ -41,7 +41,7 @@ var (
 
 func init() {
 	ctx = context.Background()
-	repoId = 675
+	repoId = 0
 }
 
 // 注册MQ相关队列
@@ -179,8 +179,15 @@ func (r *repoCrawl) DoCrawl() {
 					continue
 				}
 
+				checkSwitchToken()
+				languages, _, err := client.Repositories.ListLanguages(ctx, *repo.Owner.Login, *repo.Name)
+				if err != nil || languages == nil {
+					log.GetTextLogger().Info("Fetching nil repository by Id: %v", err)
+					continue
+				}
+
 				// 仓库信息爬取完成，进行初步清洗
-				value := domain.NewRepositoryValue(repo)
+				value := domain.NewRepositoryValue(repo, languages)
 
 				// 获取该项目的所有贡献者
 				var allContributors []*github.Contributor
