@@ -13,14 +13,11 @@ message RelationRequest{
 }
 
 message RelationResponse{
-  string username = 1;
-  string avatar_url = 2;
-  string html_url = 3;
-  repeated NetMember netMember = 4;
+  repeated NetInfo netInfo = 4;
 }
 
-message NetMember{
-  string username = 1;
-  string avatar_url = 2;
-  string evidence = 3;
+message NetInfo{
+  string relation = 1;
+  string username1 = 2;
+  string username2 = 3;
 }

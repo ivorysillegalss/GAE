@@ -35,15 +35,23 @@ type User struct {
 // UserRelation 用户关系网络相关实体类
 type UserRelation struct {
 	Username  string
-	Id        int
-	HtmlUrl   string
 	NetMember *[]*NetMember
 }
 
 type NetMember struct {
-	Username  string
-	AvatarUrl string
-	Evidence  string
+	Username string
+	Relation string
+}
+
+type NetInfo struct {
+	Relation  string
+	Username1 string
+	Username2 string
+}
+
+type NestedNetInfo struct {
+	Username1 string
+	Relations []NetInfo
 }
 
 type UserRepository interface {
@@ -53,5 +61,9 @@ type UserRepository interface {
 type UserUsecase interface {
 	QueryUserSpecificInfo(username string) *[]*Contributor
 	// QueryUserNetwork grpc访问py的api
-	QueryUserNetwork(username string) *UserRelation
+	QueryUserNetwork(username string) *[]*NestedNetInfo
+
+	QueryByNation(username string) *[]*Contributor
+
+	QueryByTech(username string) *[]*Contributor
 }

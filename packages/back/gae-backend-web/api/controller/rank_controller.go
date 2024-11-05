@@ -59,6 +59,25 @@ func (r *RankController) GetSpecificInfo(c *gin.Context) {
 	}
 }
 
-func (r *RankController) CompareInfo(c *gin.Context) {
+func (r *RelationController) GetRankByNation(c *gin.Context) {
+	nationParam := c.Param("nation")
+	queryNation := r.userUsecase.QueryByNation(nationParam)
+	if funk.IsEmpty(queryNation) || len(*queryNation) == 0 {
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Code: request.GetError})
+	} else {
+		c.JSON(http.StatusOK, domain.SuccessResponse{Code: request.GetSuccess, Data: queryNation})
+	}
+}
 
+func (r *RankController) GetRankByTechStack(c *gin.Context) {
+	techParam := c.Param("tech")
+	queryTech := r.userUsecase.QueryByTech(techParam)
+	if funk.IsEmpty(queryTech) || len(*queryTech) == 0 {
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Code: request.GetError})
+	} else {
+		c.JSON(http.StatusOK, domain.SuccessResponse{Code: request.GetSuccess, Data: queryTech})
+	}
+}
+
+func (r *RankController) CompareInfo(c *gin.Context) {
 }

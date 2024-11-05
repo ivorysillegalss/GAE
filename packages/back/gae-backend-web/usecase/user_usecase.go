@@ -23,7 +23,7 @@ func (u *userUsecase) QueryUserSpecificInfo(username string) *[]*domain.Contribu
 	return u.userRepository.QueryUser(username)
 }
 
-func (u *userUsecase) QueryUserNetwork(username string) *domain.UserRelation {
+func (u *userUsecase) QueryUserNetwork(username string) *[]*domain.NestedNetInfo {
 	client := *u.rpcEngine.GrpcClient
 	serviceClient := pb.NewRelationNetServiceClient(client.GetConn())
 	ctxt, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -38,21 +38,37 @@ func (u *userUsecase) QueryUserNetwork(username string) *domain.UserRelation {
 	return userRelation
 }
 
-func newUserRelation(resp *pb.RelationResponse) *domain.UserRelation {
-	member := resp.GetNetMember()
-	var nms []*domain.NetMember
-	for _, netMember := range member {
-		nm := &domain.NetMember{
-			Username:  netMember.Username,
-			AvatarUrl: netMember.AvatarUrl,
-			Evidence:  netMember.AvatarUrl,
+func (u *userUsecase) QueryByNation(username string) *[]*domain.Contributor {
+	panic("s")
+}
+
+func (u *userUsecase) QueryByTech(username string) *[]*domain.Contributor {
+	//TODO implement me
+	panic("implement me")
+}
+
+func newUserRelation(resp *pb.RelationResponse) *[]*domain.NestedNetInfo {
+	// 使用map分组NetInfo
+	groupedData := make(map[string][]domain.NetInfo)
+
+	// 遍历响应中的每个 NetInfo 并按 Username1 进行分组
+	for _, info := range resp.GetNetInfo() {
+		ni := domain.NetInfo{
+			Relation:  info.GetRelation(),
+			Username1: info.GetUsername1(),
+			Username2: info.GetUsername2(),
 		}
-		nms = append(nms, nm)
+		groupedData[ni.Username1] = append(groupedData[ni.Username1], ni)
 	}
 
-	return &domain.UserRelation{
-		Username:  resp.GetUsername(),
-		HtmlUrl:   resp.GetHtmlUrl(),
-		NetMember: &nms,
+	// 将 map 转换为 NestedNetInfo 的列表
+	var nestedRelations []*domain.NestedNetInfo
+	for username, relations := range groupedData {
+		nestedRelations = append(nestedRelations, &domain.NestedNetInfo{
+			Username1: username,
+			Relations: relations,
+		})
 	}
+
+	return &nestedRelations
 }
