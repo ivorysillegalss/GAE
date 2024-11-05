@@ -51,11 +51,18 @@ type NetInfo struct {
 
 type NestedNetInfo struct {
 	Username1 string
+	Nation    string
 	Relations []NetInfo
 }
 
 type UserRepository interface {
 	QueryUser(username string) *[]*Contributor
+
+	SearchUserByLevel(level string, score int) *[]*RankUser
+
+	SearchUserByNation(nation string, score int) *[]*RankUser
+
+	SearchUserByTech(tech string, score int) *[]*RankUser
 }
 
 type UserUsecase interface {
@@ -63,7 +70,10 @@ type UserUsecase interface {
 	// QueryUserNetwork grpc访问py的api
 	QueryUserNetwork(username string) *[]*NestedNetInfo
 
-	QueryByNation(username string) *[]*Contributor
+	//TODO 打缓存
+	QueryByNation(nation string, score int) *[]*RankUser
 
-	QueryByTech(username string) *[]*Contributor
+	QueryByTech(tech string, score int) *[]*RankUser
+
+	QueryByGrade(level string, score int) *[]*RankUser
 }

@@ -2,13 +2,18 @@ package repository
 
 import (
 	"database/sql"
+	"gae-backend-web/constant/search"
 	"gae-backend-web/domain"
+	"gae-backend-web/infrastructure/elasticsearch"
 	"gae-backend-web/infrastructure/hive"
 	"gae-backend-web/infrastructure/log"
+	jsoniter "github.com/json-iterator/go"
+	"github.com/olivere/elastic/v7"
 )
 
 type userRepository struct {
 	hive hive.Client
+	es   elasticsearch.Client
 }
 
 func NewUserRepository(hc hive.Client) domain.UserRepository {
@@ -64,4 +69,47 @@ func newContributorValue(rows *sql.Rows) (*domain.Contributor, error) {
 		return nil, err
 	}
 	return &contributor, nil
+}
+
+func (u *userRepository) SearchUserByLevel(level string, score int) *[]*domain.RankUser {
+	esClient := u.es.GetClient()
+	return searchUser(esClient, "level", level, score)
+}
+
+func (u *userRepository) SearchUserByNation(nation string, score int) *[]*domain.RankUser {
+	esClient := u.es.GetClient()
+	return searchUser(esClient, "nation", nation, score)
+}
+
+func (u *userRepository) SearchUserByTech(tech string, score int) *[]*domain.RankUser {
+	esClient := u.es.GetClient()
+	return searchUser(esClient, "tech", tech, score)
+}
+
+func searchUser(es *elastic.Client, esCondition string, condition string, score int) *[]*domain.RankUser {
+
+	opts := elastic.NewTermQuery(esCondition, condition)
+	boolQuery := elastic.NewBoolQuery().Filter(opts)
+	res, err := es.Search().
+		Index(search.RankSearchIndex).
+		Query(boolQuery).
+		//Sort("_id", true).
+		Sort("score", true).
+		SearchAfter([]any{score}).
+		Size(10).
+		Do(ctx)
+
+	if err != nil || len(res.Hits.Hits) == 0 {
+		log.GetTextLogger().Warn("can't find target condition  :" + condition)
+		return nil
+	}
+	var rankUser []*domain.RankUser
+	for _, v := range res.Hits.Hits {
+		var u domain.RankUser
+		if v.Source != nil {
+			_ = jsoniter.Unmarshal(v.Source, &u)
+			rankUser = append(rankUser, &u)
+		}
+	}
+	return &rankUser
 }

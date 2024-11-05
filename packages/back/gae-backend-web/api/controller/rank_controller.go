@@ -61,7 +61,9 @@ func (r *RankController) GetSpecificInfo(c *gin.Context) {
 
 func (r *RelationController) GetRankByNation(c *gin.Context) {
 	nationParam := c.Param("nation")
-	queryNation := r.userUsecase.QueryByNation(nationParam)
+	scoreParam := c.Param("score")
+	score, _ := strconv.Atoi(scoreParam)
+	queryNation := r.userUsecase.QueryByNation(nationParam, score)
 	if funk.IsEmpty(queryNation) || len(*queryNation) == 0 {
 		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Code: request.GetError})
 	} else {
@@ -71,7 +73,21 @@ func (r *RelationController) GetRankByNation(c *gin.Context) {
 
 func (r *RankController) GetRankByTechStack(c *gin.Context) {
 	techParam := c.Param("tech")
-	queryTech := r.userUsecase.QueryByTech(techParam)
+	scoreParam := c.Param("score")
+	score, _ := strconv.Atoi(scoreParam)
+	queryTech := r.userUsecase.QueryByTech(techParam, score)
+	if funk.IsEmpty(queryTech) || len(*queryTech) == 0 {
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Code: request.GetError})
+	} else {
+		c.JSON(http.StatusOK, domain.SuccessResponse{Code: request.GetSuccess, Data: queryTech})
+	}
+}
+
+func (r *RankController) GetRankByGrade(c *gin.Context) {
+	techParam := c.Param("level")
+	scoreParam := c.Param("score")
+	score, _ := strconv.Atoi(scoreParam)
+	queryTech := r.userUsecase.QueryByTech(techParam, score)
 	if funk.IsEmpty(queryTech) || len(*queryTech) == 0 {
 		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Code: request.GetError})
 	} else {
