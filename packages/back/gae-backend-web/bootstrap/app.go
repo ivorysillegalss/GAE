@@ -39,7 +39,8 @@ type Channels struct {
 }
 
 type Controllers struct {
-	RankController *controller.RankController
+	RankController     *controller.RankController
+	RelationController *controller.RelationController
 }
 
 type Executor struct {
@@ -52,15 +53,15 @@ type SearchEngine struct {
 }
 
 type RpcEngine struct {
-	GrpcClient grpc.Client
+	GrpcClient *grpc.Client
 }
 
 func (app *Application) CloseDBConnection() {
 	CloseMongoDBConnection(app.Databases.Mongo)
 }
 
-func NewControllers(rc *controller.RankController) *Controllers {
-	return &Controllers{RankController: rc}
+func NewControllers(rc *controller.RankController, rlc *controller.RelationController) *Controllers {
+	return &Controllers{RankController: rc, RelationController: rlc}
 }
 
 func NewExecutors(ce *executor.CronExecutor, cse *executor.ConsumeExecutor) *Executor {
@@ -76,5 +77,5 @@ func NewSearchEngine(es elasticsearch.Client) *SearchEngine {
 
 func NewRpcEngine(env *Env) *RpcEngine {
 	client := NewGrpc(env)
-	return &RpcEngine{GrpcClient: client}
+	return &RpcEngine{GrpcClient: &client}
 }

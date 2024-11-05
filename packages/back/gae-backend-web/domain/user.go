@@ -32,10 +32,26 @@ type User struct {
 	// 根据需要可以添加其他字段
 }
 
+// UserRelation 用户关系网络相关实体类
+type UserRelation struct {
+	Username  string
+	Id        int
+	HtmlUrl   string
+	NetMember *[]*NetMember
+}
+
+type NetMember struct {
+	Username  string
+	AvatarUrl string
+	Evidence  string
+}
+
 type UserRepository interface {
 	QueryUser(username string) *[]*Contributor
 }
 
 type UserUsecase interface {
 	QueryUserSpecificInfo(username string) *[]*Contributor
+	// QueryUserNetwork grpc访问py的api
+	QueryUserNetwork(username string) *UserRelation
 }

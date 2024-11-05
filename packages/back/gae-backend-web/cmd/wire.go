@@ -39,6 +39,7 @@ var appSet = wire.NewSet(
 	repository.NewUserRepository,
 
 	controller.NewRankController,
+	controller.NewRelationController,
 
 	consume.NewTalentEvent,
 

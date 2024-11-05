@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/beltran/gohive"
+	_ "github.com/prestodb/presto-go-client/presto"
 	"log"
 )
 
@@ -20,7 +21,7 @@ func NewHiveClient(goHiveUrl string, goHivePort int, goHiveAuth string) (Client,
 
 func goHiveConnect(url string, port int, auth string) *gohive.Connection {
 	//TODO 这里可能会报错
-	conn, err := gohive.Connect(url, port, auth, nil)
+	conn, err := gohive.Connect(url, port, auth, &gohive.ConnectConfiguration{})
 	if err != nil {
 		log.Fatal(err.Error())
 		return nil

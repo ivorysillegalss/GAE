@@ -14,8 +14,8 @@ type RankController struct {
 	userUsecase domain.UserUsecase
 }
 
-func NewRankController(ru domain.RankUsecase) *RankController {
-	return &RankController{rankUsecase: ru}
+func NewRankController(ru domain.RankUsecase, uu domain.UserUsecase) *RankController {
+	return &RankController{rankUsecase: ru, userUsecase: uu}
 }
 
 func (r *RankController) GetHotRankPhase(c *gin.Context) {

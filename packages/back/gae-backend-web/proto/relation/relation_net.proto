@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package relation;
 
-option go_package = ".proto/relation_net";
+option go_package = ".proto/";
 
 service RelationNetService{
   rpc QueryRelationNet (RelationRequest) returns (RelationResponse);

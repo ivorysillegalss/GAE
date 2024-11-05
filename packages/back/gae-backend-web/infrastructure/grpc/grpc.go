@@ -9,10 +9,15 @@ import (
 )
 
 type Client interface {
+	GetConn() *grpc.ClientConn
 }
 
 type grpcClient struct {
 	*grpc.ClientConn
+}
+
+func (g *grpcClient) GetConn() *grpc.ClientConn {
+	return g.ClientConn
 }
 
 func NewGrpcClient(grpcUrl string) Client {

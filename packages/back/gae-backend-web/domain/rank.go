@@ -22,6 +22,7 @@ type RankUser struct {
 	HTMLURL   string
 	Location  string
 	Company   string
-	//TODO 存储分则TBD
+	//TODO 存储分数TBD
 	Score int
+	Level string
 }
