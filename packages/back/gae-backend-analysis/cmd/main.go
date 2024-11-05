@@ -1,17 +1,13 @@
 package main
 
-import (
-	route "gae-backend-analysis/api/route"
-)
+import "gae-backend-analysis/bootstrap"
 
 func main() {
 	app, err := InitializeApp()
 	if err != nil {
 		return
 	}
-	defer app.CloseDBConnection()
-
-	setup := route.Setup(app.Controllers, app.Executor)
+	r := bootstrap.Setup(app)
 	//gin.SetMode(gin.DebugMode)
-	setup.Run(app.Env.ServerAddress)
+	r.Run(app.Env.ServerAddress)
 }

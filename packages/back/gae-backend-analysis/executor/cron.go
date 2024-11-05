@@ -12,7 +12,7 @@ type CronExecutor struct {
 func (d *CronExecutor) SetupCron() {
 
 	//go d.TalentCron.AnalyseContributor()
-	go d.TalentCron.AnalyseRepo()
+	//go d.TalentCron.AnalyseRepo()
 }
 
 func NewCronExecutor(t domain.TalentCron) *CronExecutor {

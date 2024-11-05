@@ -11,10 +11,7 @@ import (
 	"gae-backend-analysis/consume"
 	"gae-backend-analysis/cron"
 	"gae-backend-analysis/executor"
-	"gae-backend-analysis/internal/tokenutil"
 	"gae-backend-analysis/repository"
-	"gae-backend-analysis/task"
-	"gae-backend-analysis/usecase"
 	"github.com/google/wire"
 )
 
@@ -25,35 +22,24 @@ func InitializeApp() (*bootstrap.Application, error) {
 	env := bootstrap.NewEnv()
 	databases := bootstrap.NewDatabases(env)
 	poolsFactory := bootstrap.NewPoolFactory()
-	channels := bootstrap.NewChannel()
-	controllers := bootstrap.NewControllers()
 	client := bootstrap.NewRedisDatabase(env)
 	talentRepository := repository.NewTalentRepository(client)
 	talentCron := cron.NewTalentCron(talentRepository, poolsFactory)
 	cronExecutor := executor.NewCronExecutor(talentCron)
-	connection := bootstrap.NewRabbitConnection(env)
-	messageHandler := consume.NewMessageHandler(connection)
-	generationRepository := repository.NewGenerationRepository(databases)
-	conf := bootstrap.NewKafkaConf(env)
-	generateEvent := consume.NewGenerateEvent(messageHandler, env, channels, generationRepository)
-	talentEvent := consume.NewTalentEvent(env, conf, talentRepository)
-	consumeExecutor := executor.NewConsumeExecutor(generateEvent, talentEvent)
+	kafkaConf := bootstrap.NewKafkaConf(env)
+	talentEvent := consume.NewTalentEvent(env, kafkaConf, talentRepository)
+	consumeExecutor := executor.NewConsumeExecutor(talentEvent)
 	dataExecutor := executor.NewDataExecutor(client)
 	bootstrapExecutor := bootstrap.NewExecutors(cronExecutor, consumeExecutor, dataExecutor)
-	elasticsearchClient := bootstrap.NewEsEngine(env)
-	searchEngine := bootstrap.NewSearchEngine(elasticsearchClient)
 	application := &bootstrap.Application{
 		Env:          env,
 		Databases:    databases,
 		PoolsFactory: poolsFactory,
-		Channels:     channels,
-		Controllers:  controllers,
 		Executor:     bootstrapExecutor,
-		SearchEngine: searchEngine,
 	}
 	return application, nil
 }
 
 // wire.go:
 
-var appSet = wire.NewSet(bootstrap.NewEnv, tokenutil.NewTokenUtil, bootstrap.NewDatabases, bootstrap.NewRedisDatabase, bootstrap.NewMysqlDatabase, bootstrap.NewMongoDatabase, bootstrap.NewPoolFactory, bootstrap.NewChannel, bootstrap.NewRabbitConnection, bootstrap.NewControllers, bootstrap.NewExecutors, bootstrap.NewKafkaConf, bootstrap.NewEsEngine, bootstrap.NewSearchEngine, repository.NewGenerationRepository, repository.NewChatRepository, repository.NewBotRepository, repository.NewTalentRepository, consume.NewTalentEvent, consume.NewStorageEvent, consume.NewGenerateEvent, consume.NewMessageHandler, cron.NewGenerationCron, cron.NewTalentCron, executor.NewCronExecutor, executor.NewConsumeExecutor, executor.NewDataExecutor, usecase.NewChatUseCase, task.NewAskChatTask, task.NewConvertTask, wire.Struct(new(bootstrap.Application), "*"))
+var appSet = wire.NewSet(bootstrap.NewEnv, bootstrap.NewPoolFactory, bootstrap.NewExecutors, bootstrap.NewKafkaConf, bootstrap.NewDatabases, bootstrap.NewRedisDatabase, repository.NewTalentRepository, consume.NewTalentEvent, cron.NewTalentCron, executor.NewCronExecutor, executor.NewConsumeExecutor, executor.NewDataExecutor, wire.Struct(new(bootstrap.Application), "*"))
