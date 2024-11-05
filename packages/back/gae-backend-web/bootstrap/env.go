@@ -36,6 +36,8 @@ type Env struct {
 	HiveUrl  string `mapstructure:"HIVE_URL"`
 	HIvePort int    `mapstructure:"HIVE_PORT"`
 
+	GrpcUrl string `mapstructure:"GRPC_URL"`
+
 	JwtSecretToken string `mapstructure:"JWT_SECRET_KEY"`
 
 	Serializer string `mapstructure:"SERIALIZER"`

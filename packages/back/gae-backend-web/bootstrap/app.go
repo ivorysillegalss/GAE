@@ -4,6 +4,7 @@ import (
 	"gae-backend-web/api/controller"
 	"gae-backend-web/executor"
 	"gae-backend-web/infrastructure/elasticsearch"
+	"gae-backend-web/infrastructure/grpc"
 	"gae-backend-web/infrastructure/hive"
 	"gae-backend-web/infrastructure/mongo"
 	"gae-backend-web/infrastructure/mysql"
@@ -50,6 +51,10 @@ type SearchEngine struct {
 	EsEngine elasticsearch.Client
 }
 
+type RpcEngine struct {
+	GrpcClient grpc.Client
+}
+
 func (app *Application) CloseDBConnection() {
 	CloseMongoDBConnection(app.Databases.Mongo)
 }
@@ -67,4 +72,9 @@ func NewExecutors(ce *executor.CronExecutor, cse *executor.ConsumeExecutor) *Exe
 
 func NewSearchEngine(es elasticsearch.Client) *SearchEngine {
 	return &SearchEngine{EsEngine: es}
+}
+
+func NewRpcEngine(env *Env) *RpcEngine {
+	client := NewGrpc(env)
+	return &RpcEngine{GrpcClient: client}
 }

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package relation;
+
+option go_package = ".proto/relation_net";
+
+service RelationNetService{
+  rpc QueryRelationNet (RelationRequest) returns (RelationResponse);
+}
+
+message RelationRequest{
+  string username = 1;
+}
+
+message RelationResponse{
+  string username = 1;
+  string avatar_url = 2;
+  string html_url = 3;
+  repeated NetMember netMember = 4;
+}
+
+message NetMember{
+  string username = 1;
+  string avatar_url = 2;
+  string evidence = 3;
+}

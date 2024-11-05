@@ -30,6 +30,7 @@ var appSet = wire.NewSet(
 	bootstrap.NewEsEngine,
 	bootstrap.NewSearchEngine,
 	bootstrap.NewHiveDBConnection,
+	bootstrap.NewRpcEngine,
 
 	usecase.NewRankUsecase,
 	usecase.NewUsecase,
