@@ -224,7 +224,7 @@ class Query():
             o= h[t] 
             while o != -1: 
                 j = e[o] 
-                Ls.append(f_pmap[j]) 
+                Ls.append((f_pmap[j], w[o]))  
                 o = ne[o] 
             end_res[i]=Ls 
             # print(i, Ls)
