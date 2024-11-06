@@ -19,7 +19,6 @@ func NewUsecase(ur domain.UserRepository, re *bootstrap.RpcEngine) domain.UserUs
 }
 
 func (u *userUsecase) QueryUserSpecificInfo(username string) *[]*domain.Contributor {
-	//TODO 打缓存
 	return u.userRepository.QueryUser(username)
 }
 

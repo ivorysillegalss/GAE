@@ -45,12 +45,12 @@ func (p *ParquetHandler) ReadData(filePath string, businessId int) *domain.Talen
 
 		num := int(parquetReader.GetNumRows())
 		for j := 0; j < num; j++ {
-			var talentBatch []*domain.Contributor
+			var talentBatch *domain.Contributor
 			if err := parquetReader.Read(&talentBatch); err != nil {
 				log.GetTextLogger().Error("Read error for file %s: %v", filePath, err)
 				break
 			}
-			contributors = append(contributors, talentBatch...)
+			contributors = append(contributors, talentBatch)
 		}
 
 	case mq.UnCleansingRepoId:
@@ -64,12 +64,12 @@ func (p *ParquetHandler) ReadData(filePath string, businessId int) *domain.Talen
 
 		num := int(parquetReader.GetNumRows())
 		for j := 0; j < num; j++ {
-			var talentBatch []*domain.Repo
+			var talentBatch *domain.Repo
 			if err := parquetReader.Read(&talentBatch); err != nil {
 				log.GetTextLogger().Error("Read error for file %s: %v", filePath, err)
 				break
 			}
-			repos = append(repos, talentBatch...)
+			repos = append(repos, talentBatch)
 		}
 	}
 

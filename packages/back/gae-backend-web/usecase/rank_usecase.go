@@ -15,7 +15,6 @@ func (r *rankUsecase) GetHotRankPhase() *[]string {
 }
 
 func (r *rankUsecase) SearchUserRank(username string) *[]*domain.RankUser {
-	//TODO redis打缓存
 	return r.rankRepository.SearchUserRank(username)
 }
 
