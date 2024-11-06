@@ -2,21 +2,13 @@ package elasticsearch
 
 import (
 	"context"
+	"gae-backend-web/constant/search"
 
 	"gae-backend-web/infrastructure/log"
 	"github.com/olivere/elastic/v7"
 )
 
 var ctx = context.Background()
-
-// TODO 根据Talent搜索所需的元素，改造mapping,此处为示例
-const mapping = `
-{
-   "settings":{
-      "number_of_shards": 1,
-      "number_of_replicas": 0 
-   },
-}`
 
 type Client interface {
 	Ping(esUrl string) (int, error)
@@ -45,9 +37,7 @@ func NewElasticSearchClient(esUrl string) (Client, error) {
 }
 
 func initEsIndex(client *elastic.Client) {
-	//TODO 加入TalentRank所需的元素，构建搜索部分资源的表
-	//addIndex(client,"","")
-
+	addIndex(client, search.RankSearchIndex, search.RankIndexMapping)
 }
 
 type esClient struct {
