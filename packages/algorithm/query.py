@@ -12,6 +12,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 class Query():
     def __init__(self) -> None:
         super().__init__()
+        self.nation_data = self.load_or_create_nation_data()
 
     '''
         # 得到排行榜，只会在更新时重置
@@ -26,7 +27,7 @@ class Query():
 
     # 全部人
     def query_Ranks(self, base: List[str]) -> None:
-        with open("data\project.pkl", 'rb') as f:
+        with open(os.path.join("data", "project.pkl"), 'rb') as f:
             loaded_dict = pickle.load(f)
         df1 = pq.ParquetDataset(r"result\Woker.parquet").read().to_pandas()
         user_list = [int(i) for i in df1['ID'].tolist()]
@@ -94,6 +95,15 @@ class Query():
         df = pq.ParquetDataset(r"result\all_rank.parquet").read().to_pandas()
         res = pd.DataFrame(df[df['ID'] == id])
         res.to_parquet("result/one_rank.parquet")
+
+    def load_or_create_nation_data(self):
+        if os.path.exists('result/nation.pkl'):
+            with open(os.path.join("result", "nation.pkl"), 'rb') as f:
+                return pickle.load(f)
+        else:
+            self.query_nation()  # 运行国家推测
+            with open(os.path.join("result", "nation.pkl"), 'rb') as f:
+                return pickle.load(f)
 
     # 猜测国家
     def query_nation(self) -> None:
@@ -218,7 +228,7 @@ class Query():
         # df = pd.DataFrame({'ID': ones, 'countries': end_res}) 
         # df.to_parquet("result/all_nation.parquet") 
         end_res = dict(zip(ones, end_res))
-        with open('result/nation.pkl', 'wb') as f:
+        with open(os.path.join("result", "nation.pkl"), 'rb') as f:
             pickle.dump(end_res, f)
 
         end_res = dict()
@@ -233,8 +243,15 @@ class Query():
             end_res[i] = Ls
             # print(i, Ls)
 
-        with open('result/graph.pkl', 'wb') as f:
+        with open(os.path.join("result", "graph.pkl"), 'wb') as f:
             pickle.dump(end_res, f)
+
+    def get_nation_for_user(self, user_id: int) -> str:
+        # 从加载的字典中获取指定用户的国家信息
+        if user_id in self.nation_data:
+            return self.nation_data[user_id]
+        else:
+            return "未知"  # 如果用户不在结果中
 
 # if __name__ == "__main__": 
 #     rank = Query() 
