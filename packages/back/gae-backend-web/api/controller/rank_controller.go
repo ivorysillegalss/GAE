@@ -95,5 +95,11 @@ func (r *RankController) GetRankByGrade(c *gin.Context) {
 	}
 }
 
+// TODO
+func (r *RankController) GetRankEntity(c *gin.Context) {
+	rankEntity := r.rankUsecase.GetRankEntity()
+	c.JSON(http.StatusOK, domain.SuccessResponse{Code: request.GetSuccess, Data: rankEntity})
+}
+
 func (r *RankController) CompareInfo(c *gin.Context) {
 }

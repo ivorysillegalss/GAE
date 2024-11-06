@@ -17,5 +17,7 @@ func RegisterRankRouter(router *gin.RouterGroup, c *bootstrap.Controllers) {
 		rankGroup.GET("/level/:level/:score", rc.GetRankByGrade)
 		rankGroup.GET("/tech/:tech/:score", rc.GetRankByTechStack)
 		rankGroup.GET("/nation/:nation/:score", rc.GetRankByNation)
+
+		rankGroup.GET("/init", rc.GetRankEntity)
 	}
 }
