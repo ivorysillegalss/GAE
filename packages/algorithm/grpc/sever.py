@@ -5,6 +5,8 @@ from proto import relation_net_pb2
 from proto import relation_net_pb2_grpc
 from proto import nation_pb2
 from proto import nation_pb2_grpc
+from proto import storage_pb2
+from proto import storage_pb2_grpc
 from query import Query
 
 
@@ -21,6 +23,13 @@ class NationService(nation_pb2_grpc.NationServiceServicer):
         rank = Query()
         user = rank.get_nation_for_user(request.username)
         return nation_pb2.RelationResponse(user)
+
+
+class StorageServiceServicer(storage_pb2_grpc.StorageServiceServicer):
+    def UpdateData(self, request, context):
+        rank = Query()
+        rank.query_Ranks()
+        return storage_pb2.StorageResponse("success")
 
 
 # 启动 gRPC 服务器
