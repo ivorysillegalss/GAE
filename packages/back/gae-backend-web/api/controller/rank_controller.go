@@ -59,7 +59,7 @@ func (r *RankController) GetSpecificInfo(c *gin.Context) {
 	}
 }
 
-func (r *RelationController) GetRankByNation(c *gin.Context) {
+func (r *RankController) GetRankByNation(c *gin.Context) {
 	nationParam := c.Param("nation")
 	scoreParam := c.Param("score")
 	score, _ := strconv.Atoi(scoreParam)

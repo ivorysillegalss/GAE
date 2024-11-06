@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package nation;
+
+option go_package = ".proto/";
+
+service NationService{
+  rpc QueryNation (NationRequest) returns (NationResponse);
+}
+
+message NationRequest{
+  string username = 1;
+}
+
+message NationResponse{
+  repeated NationInfo NationInfo = 1;
+}
+
+message NationInfo{
+  string Nation = 1;
+  int64 NationWeight = 2;
+}

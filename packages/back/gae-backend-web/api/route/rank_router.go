@@ -14,5 +14,8 @@ func RegisterRankRouter(router *gin.RouterGroup, c *bootstrap.Controllers) {
 		rankGroup.GET("/user/info/:username", rc.GetUserRank)
 		rankGroup.GET("/user/info/specific/:username", rc.GetSpecificInfo)
 		rankGroup.GET("/compare/:user1/:user2", rc.CompareInfo)
+		rankGroup.GET("/level/:level/:score", rc.GetRankByGrade)
+		rankGroup.GET("/tech/:tech/:score", rc.GetRankByTechStack)
+		rankGroup.GET("/nation/:nation/:score", rc.GetRankByNation)
 	}
 }

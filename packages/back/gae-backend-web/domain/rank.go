@@ -23,6 +23,8 @@ type RankUser struct {
 	Location  string
 	Company   string
 	//TODO 存储分数TBD
-	Score int
-	Level string
+	Score                  int
+	Level                  string
+	LocationClassification string
+	Tech                   string
 }

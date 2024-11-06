@@ -14,17 +14,10 @@ message RelationRequest{
 
 message RelationResponse{
   repeated NetInfo netInfo = 1;
-  NationInfo nationInfo1 = 2;
-  NationInfo nationInfo2 = 3;
 }
 
 message NetInfo{
-  string relation = 1;
-  string username1 = 2;
-  string username2 = 3;
-}
-
-message NationInfo{
-  string Nation = 1;
-  int64 NationWeight = 2;
+  string username = 1;
+  int64 relationWeight = 2;
+  string avatarUrl = 3;
 }

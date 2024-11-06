@@ -32,27 +32,20 @@ type User struct {
 	// 根据需要可以添加其他字段
 }
 
-// UserRelation 用户关系网络相关实体类
-type UserRelation struct {
+type NationInfo struct {
+	Nation       string // 用户所属的国家/地区
+	NationWeight int64  // 国家/地区的权重，表示重要性或影响力
+}
+
+type RelationInfo struct {
+	Username       string
+	RelationMember *[]*RelationMember
+}
+
+type RelationMember struct {
 	Username  string
-	NetMember *[]*NetMember
-}
-
-type NetMember struct {
-	Username string
-	Relation string
-}
-
-type NetInfo struct {
-	Relation  string
-	Username1 string
-	Username2 string
-}
-
-type NestedNetInfo struct {
-	Username1 string
-	Nation    string
-	Relations []NetInfo
+	Weight    int
+	AvatarUrl string
 }
 
 type UserRepository interface {
@@ -68,7 +61,7 @@ type UserRepository interface {
 type UserUsecase interface {
 	QueryUserSpecificInfo(username string) *[]*Contributor
 	// QueryUserNetwork grpc访问py的api
-	QueryUserNetwork(username string) *[]*NestedNetInfo
+	QueryUserNetwork(username string) *RelationInfo
 
 	//TODO 打缓存
 	QueryByNation(nation string, score int) *[]*RankUser
