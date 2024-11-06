@@ -98,5 +98,9 @@ func (r *RankController) GetRankByGrade(c *gin.Context) {
 	}
 }
 
+func (r *RankController) GetRankEntity(c *gin.Context) {
+	c.JSON(http.StatusOK, domain.SuccessResponse{Code: request.GetSuccess, Data: domain.RandRankEntity()})
+}
+
 func (r *RankController) CompareInfo(c *gin.Context) {
 }

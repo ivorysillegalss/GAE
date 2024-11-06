@@ -66,6 +66,7 @@ func generateRankUsers(nation string, score int) *[]*domain.RankUser {
 // generateFakeRankUser generates a single RankUser with random data
 func generateFakeRankUser(nation string, score int) *domain.RankUser {
 	return &domain.RankUser{
+		Placement:              666,
 		Login:                  faker.Username(),
 		Id:                     rand.Int63n(1000000), // Random ID for testing
 		AvatarURL:              faker.URL(),

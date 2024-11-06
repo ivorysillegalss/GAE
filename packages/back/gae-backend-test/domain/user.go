@@ -1,6 +1,7 @@
 package domain
 
 type Contributor struct {
+	Placement  int    `parquet:"name=placement, type=INT64"`
 	Login      string `parquet:"name=login, type=BYTE_ARRAY, convertedtype=UTF8"`
 	Id         int64  `parquet:"name=id, type=INT64"`
 	AvatarURL  string `parquet:"name=avatar_url, type=BYTE_ARRAY, convertedtype=UTF8"`

@@ -16,6 +16,7 @@ type RankRepository interface {
 }
 
 type RankUser struct {
+	Placement int `parquet:"name=placement, type=INT64"`
 	Login     string
 	Id        int64
 	AvatarURL string
@@ -27,4 +28,18 @@ type RankUser struct {
 	Level                  string
 	LocationClassification float64
 	Tech                   string
+}
+
+type RankEntity struct {
+	Tech   []string
+	Nation []string
+	Level  []string
+}
+
+func RandRankEntity() *RankEntity {
+	return &RankEntity{
+		Tech:   []string{"c++", "c", "java"},
+		Nation: []string{"china", "usa"},
+		Level:  []string{"a", "b", "c"},
+	}
 }
