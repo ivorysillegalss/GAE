@@ -29,8 +29,7 @@ func InitializeApp() (*bootstrap.Application, error) {
 	elasticsearchClient := bootstrap.NewEsEngine(env)
 	rankRepository := repository.NewRankRepository(client, elasticsearchClient)
 	rankUsecase := usecase.NewRankUsecase(rankRepository)
-	hiveClient := bootstrap.NewHiveDBConnection(env)
-	userRepository := repository.NewUserRepository(hiveClient)
+	userRepository := repository.NewUserRepository(elasticsearchClient)
 	rpcEngine := bootstrap.NewRpcEngine(env)
 	userUsecase := usecase.NewUsecase(userRepository, rpcEngine)
 	rankController := controller.NewRankController(rankUsecase, userUsecase)
@@ -54,4 +53,4 @@ func InitializeApp() (*bootstrap.Application, error) {
 
 // wire.go:
 
-var appSet = wire.NewSet(bootstrap.NewEnv, tokenutil.NewTokenUtil, bootstrap.NewDatabases, bootstrap.NewRedisDatabase, bootstrap.NewMysqlDatabase, bootstrap.NewMongoDatabase, bootstrap.NewPoolFactory, bootstrap.NewChannel, bootstrap.NewControllers, bootstrap.NewExecutors, bootstrap.NewKafkaConf, bootstrap.NewEsEngine, bootstrap.NewSearchEngine, bootstrap.NewHiveDBConnection, bootstrap.NewRpcEngine, usecase.NewRankUsecase, usecase.NewUsecase, repository.NewRankRepository, repository.NewUserRepository, controller.NewRankController, controller.NewRelationController, consume.NewTalentEvent, executor.NewCronExecutor, executor.NewConsumeExecutor, wire.Struct(new(bootstrap.Application), "*"))
+var appSet = wire.NewSet(bootstrap.NewEnv, tokenutil.NewTokenUtil, bootstrap.NewDatabases, bootstrap.NewRedisDatabase, bootstrap.NewMysqlDatabase, bootstrap.NewMongoDatabase, bootstrap.NewPoolFactory, bootstrap.NewChannel, bootstrap.NewControllers, bootstrap.NewExecutors, bootstrap.NewKafkaConf, bootstrap.NewEsEngine, bootstrap.NewSearchEngine, bootstrap.NewRpcEngine, usecase.NewRankUsecase, usecase.NewUsecase, repository.NewRankRepository, repository.NewUserRepository, controller.NewRankController, controller.NewRelationController, consume.NewTalentEvent, executor.NewCronExecutor, executor.NewConsumeExecutor, wire.Struct(new(bootstrap.Application), "*"))

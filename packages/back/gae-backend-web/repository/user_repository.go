@@ -5,40 +5,22 @@ import (
 	"gae-backend-web/constant/search"
 	"gae-backend-web/domain"
 	"gae-backend-web/infrastructure/elasticsearch"
-	"gae-backend-web/infrastructure/hive"
 	"gae-backend-web/infrastructure/log"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/olivere/elastic/v7"
 )
 
 type userRepository struct {
-	hive hive.Client
-	es   elasticsearch.Client
+	es elasticsearch.Client
 }
 
-func NewUserRepository(hc hive.Client) domain.UserRepository {
-	return &userRepository{hive: hc}
+func NewUserRepository(es elasticsearch.Client) domain.UserRepository {
+	return &userRepository{es: es}
 }
 
 func (u *userRepository) QueryUser(username string) *[]*domain.Contributor {
-	//TODO query条件补全
-	query, err := u.hive.Query("")
-	if err != nil {
-		log.GetTextLogger().Warn("error querying user, username is: " + username)
-		return nil
-	}
-	var c []*domain.Contributor
-	for query.Next() {
-		cv, err := newContributorValue(query)
-		if err != nil {
-			if err != nil {
-				log.GetTextLogger().Warn("error querying user, username is: " + username)
-				return nil
-			}
-		}
-		c = append(c, cv)
-	}
-	return &c
+	//TODO
+	panic("TODO")
 }
 
 // 根据查询结果构建并返回 Contributor 实例

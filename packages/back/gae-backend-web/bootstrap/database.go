@@ -3,8 +3,6 @@ package bootstrap
 import (
 	"context"
 	"fmt"
-	"gae-backend-web/constant/dao"
-	"gae-backend-web/infrastructure/hive"
 	"gae-backend-web/infrastructure/mongo"
 	"gae-backend-web/infrastructure/mysql"
 	"gae-backend-web/infrastructure/redis"
@@ -96,19 +94,9 @@ func CloseMongoDBConnection(client mongo.Client) {
 	log.Println("Connection to MongoDB closed.")
 }
 
-func NewHiveDBConnection(env *Env) hive.Client {
-	client, err := hive.NewHiveClient(env.HiveUrl, env.HIvePort, dao.HiveNoneAuth)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Connection to Hive Started")
-	return client
-}
-
 func NewDatabases(env *Env) *Databases {
 	return &Databases{
 		Redis: NewRedisDatabase(env),
 		Mysql: NewMysqlDatabase(env),
-		Hive:  NewHiveDBConnection(env),
 	}
 }
