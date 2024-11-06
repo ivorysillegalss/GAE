@@ -1,4 +1,4 @@
-file_worker = "" 
+file_worker = ""
 file_project = ""
 info_project = {
     'repo_id': '仓库ID',
@@ -14,7 +14,7 @@ info_project = {
     'subscribers_count': '订阅者数量',
     'watchers_count': '观看者数量',
     'contributors_id': '贡献者ID',
-    'main_language':'主要语言',
+    'main_language': '主要语言',
     'languages': '语言'
 }
 
@@ -124,4 +124,4 @@ countries = [
     "United States", "Uzbekistan", "Vietnam"
 ]
 worker_use_list = ['公开仓库数量', '公开 Gist 数量', '粉丝数量', '关注数量']
-project_use_list = ['Forks数量','网络数量','开放问题数量','星标数量','订阅者数量','观看者数量']
+project_use_list = ['Forks数量', '网络数量', '开放问题数量', '星标数量', '订阅者数量', '观看者数量']
