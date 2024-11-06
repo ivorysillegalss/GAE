@@ -4,7 +4,6 @@ import (
 	"gae-backend-test/domain"
 	"github.com/bxcodec/faker/v3"
 	"math/rand"
-	"time"
 )
 
 type userUsecase struct {
@@ -27,46 +26,18 @@ func (u *userUsecase) QueryUserSpecificInfo(username string) *[]*domain.Contribu
 	return generateFakeContributor()
 }
 
-func (u *userUsecase) QueryUserNetwork(username string) *[]*domain.NestedNetInfo {
-	rand.Seed(time.Now().UnixNano()) // Seed for randomness
-	var nns []*domain.NestedNetInfo
-	nns = append(nns, GenerateFakeNestedNetInfo())
-	return &nns
-}
-
-// GenerateFakeNationInfo generates random NationInfo data
-func GenerateFakeNationInfo() *domain.NationInfo {
-	return &domain.NationInfo{
-		Nation:       faker.Word(),
-		NationWeight: rand.Int63n(100),
+func (u *userUsecase) QueryUserNetwork(username string) *domain.RelationInfo {
+	member := &domain.RelationMember{
+		Username:  faker.Username(),
+		Weight:    666,
+		AvatarUrl: faker.URL(),
 	}
-}
-
-// GenerateFakeNestedNetInfo generates a nested structure with depth 2 and length 1
-func GenerateFakeNestedNetInfo() *domain.NestedNetInfo {
-	// Generate main node (center node)
-	mainNode := &domain.NestedNetInfo{
-		Relation:   faker.Word(),
-		Username:   faker.Username(),
-		NationInfo: GenerateFakeNationInfo(),
+	var ms []*domain.RelationMember
+	members := append(ms, member)
+	return &domain.RelationInfo{
+		RelationMember: &members,
+		Username:       username,
 	}
-
-	// Generate only one child node to fulfill the length constraint
-	childNode1 := &domain.NestedNetInfo{
-		Relation:   faker.Word(),
-		Username:   faker.Username(),
-		NationInfo: GenerateFakeNationInfo(),
-	}
-	childNode2 := &domain.NestedNetInfo{
-		Relation:   faker.Word(),
-		Username:   faker.Username(),
-		NationInfo: GenerateFakeNationInfo(),
-	}
-
-	// Assign the single child to the main node's relations
-	mainNode.Relations = []*domain.NestedNetInfo{childNode1, childNode2}
-
-	return mainNode
 }
 
 func (u *userUsecase) QueryByNation(nation string, score int) *[]*domain.RankUser {
@@ -95,14 +66,16 @@ func generateRankUsers(nation string, score int) *[]*domain.RankUser {
 // generateFakeRankUser generates a single RankUser with random data
 func generateFakeRankUser(nation string, score int) *domain.RankUser {
 	return &domain.RankUser{
-		Login:     faker.Username(),
-		Id:        rand.Int63n(1000000), // Random ID for testing
-		AvatarURL: faker.URL(),
-		HTMLURL:   faker.URL(),
-		Location:  "nation", // Use provided nation for testing
-		Company:   "company",
-		Score:     123,
-		Level:     generateRandomLevel(), // Generate a random level
+		Login:                  faker.Username(),
+		Id:                     rand.Int63n(1000000), // Random ID for testing
+		AvatarURL:              faker.URL(),
+		HTMLURL:                faker.URL(),
+		Location:               "nation", // Use provided nation for testing
+		Company:                "company",
+		Score:                  123,
+		Level:                  generateRandomLevel(), // Generate a random level
+		LocationClassification: 0.8,
+		Tech:                   faker.Word(),
 	}
 }
 
