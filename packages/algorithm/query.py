@@ -71,19 +71,46 @@ class Query():
 
         result = sorted(dic.items(), key=lambda item: (item[1][0], item[1][1]), reverse=True)
 
-        id, project_score, user_score = [], [], []
+        id_list, project_score, user_score = [], [], []
         for i, j in result:
-            id.append(i)
+            id_list.append(i)
             project_score.append(j[0])
             user_score.append(j[1])
         temp = pq.ParquetDataset(r"data\contributor_output.parquet").read().to_pandas()
 
-        temp['ID'] = pd.Categorical(temp['ID'], categories=id, ordered=True)
+        temp['ID'] = pd.Categorical(temp['ID'], categories=id_list, ordered=True)
         temp = temp.sort_values("ID")
 
         temp_list = ['登录名', '头像 URL', 'HTML 网址', 'Gravatar ID', '姓名', '公司', '博客', '位置', '邮箱',
                      '个人简介']
-        df = {'ID': id, 'project_score': project_score, 'user_score': user_score}
+        df = {'ID': id_list, 'project_score': project_score, 'user_score': user_score}
+
+        # Get country and confidence for each user using their username
+        country_list = []
+        confidence_list = []
+        username_list = temp['登录名'].tolist()
+        username_map = dict(zip(temp['ID'].tolist(), username_list))
+
+        for i in id_list:
+            username = username_map.get(i, '')
+            if username in self.nation_data:
+                country_confidence_list = self.nation_data[username]
+                if country_confidence_list:
+                    # Get the country with the highest confidence
+                    country, confidence = country_confidence_list[0]
+                    country_list.append(country)
+                    confidence_list.append(confidence)
+                    # 不存在时的特殊处理
+                else:
+                    country_list.append("未知")
+                    confidence_list.append(0)
+            else:
+                country_list.append("未知")
+                confidence_list.append(0)
+
+        df['国家'] = country_list
+        df['最佳置信度'] = confidence_list
+
         for i in temp_list:
             df[i] = temp[i].tolist()
         df = pd.DataFrame(df)
@@ -97,6 +124,8 @@ class Query():
         res = pd.DataFrame(df[df['ID'] == id])
         res.to_parquet("result/one_rank.parquet")
 
+
+    # TODO 提取
     def load_or_create_relation_data(self):
         if os.path.exists('result/graph.pkl'):
             with open(os.path.join("result", "graph.pkl"), 'rb') as f:
