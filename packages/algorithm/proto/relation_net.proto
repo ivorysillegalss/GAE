@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package relation;
+
+option go_package = ".proto/";
+
+service RelationNetService{
+  rpc QueryRelationNet (RelationRequest) returns (RelationResponse);
+}
+
+message RelationRequest{
+  string username = 1;
+}
+
+message RelationResponse{
+  repeated NetInfo netInfo = 1;
+}
+
+message NetInfo{
+  string relation = 1;
+  string username1 = 2;
+  string username2 = 3;
+  NationInfo nationInfo1 = 4;
+  NationInfo nationInfo2 = 5;
+}
+
+message NationInfo{
+  string Nation = 1;
+  int64 NationWeight = 2;
+}

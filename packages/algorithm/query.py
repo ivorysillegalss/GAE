@@ -13,6 +13,7 @@ class Query():
     def __init__(self) -> None:
         super().__init__()
         self.nation_data = self.load_or_create_nation_data()
+        self.graph_data = self.load_or_create_relation_data()
 
     '''
         # 得到排行榜，只会在更新时重置
@@ -96,6 +97,15 @@ class Query():
         res = pd.DataFrame(df[df['ID'] == id])
         res.to_parquet("result/one_rank.parquet")
 
+    def load_or_create_relation_data(self):
+        if os.path.exists('result/graph.pkl'):
+            with open(os.path.join("result", "graph.pkl"), 'rb') as f:
+                return pickle.load(f)
+        else:
+            self.query_nation()  # 运行国家推测
+            with open(os.path.join("result", "graph.pkl"), 'rb') as f:
+                return pickle.load(f)
+
     def load_or_create_nation_data(self):
         if os.path.exists('result/nation.pkl'):
             with open(os.path.join("result", "nation.pkl"), 'rb') as f:
@@ -111,12 +121,23 @@ class Query():
         # 存储nation信息为：Nation.parquet 
         df1 = pq.ParquetDataset(r"data\contributor_output.parquet").read().to_pandas()
         n = len(df1["ID"].tolist())
-        user_id = df1["ID"].tolist()
+        user_ids = df1["ID"].tolist()
+
+        print(df1.columns)
+
+        usernames = df1["登录名"].tolist()
+        avatar_urls = df1["头像 URL"].tolist()
+
         point_map = dict()
         f_pmap = dict()
+        username_map = dict()
+        avatar_urls_map = dict()
+
         c = 0
-        for i in df1['ID'].tolist():
+        for i, username, avatar_url in zip(df1['ID'].tolist(), usernames, avatar_urls):
             point_map[i] = c + 1
+            avatar_urls_map[i] = str(avatar_url)
+            username_map[i] = str(username)
             c += 1
             f_pmap[c] = i
 
@@ -196,10 +217,8 @@ class Query():
                     con[I_D] = j
                     break
 
-                    # dres=dict()
-        ones = []
-        end_res = []
-        for i in user_id:
+        end_res = dict()
+        for i in user_ids:
             dist = deque_bfs(point_map[i])
 
             dic_tmp = {}
@@ -223,37 +242,50 @@ class Query():
                 if rk == 0: rk = 1
                 tl += 1
                 result.append((k, rk))
-            end_res.append(result)
-            ones.append(i)
+
+            end_res[username_map.get(i, '')] = result
         # df = pd.DataFrame({'ID': ones, 'countries': end_res}) 
         # df.to_parquet("result/all_nation.parquet") 
-        end_res = dict(zip(ones, end_res))
-        with open(os.path.join("result", "nation.pkl"), 'rb') as f:
+        with open(os.path.join("result", "nation.pkl"), 'wb') as f:
             pickle.dump(end_res, f)
 
-        end_res = dict()
-        for i in user_id:
+        end_res_1 = dict()
+        for i in user_ids:
             Ls = []
             t = point_map[i]
             o = h[t]
             while o != -1:
                 j = e[o]
-                Ls.append(f_pmap[j])
+                Ls.append(
+                    (
+                        username_map.get(f_pmap[j])
+                        , int(w[o])
+                        , avatar_urls_map.get(i, ''),
+                    ))
+
                 o = ne[o]
-            end_res[i] = Ls
+            end_res_1[username_map.get(i, '')] = Ls
             # print(i, Ls)
 
         with open(os.path.join("result", "graph.pkl"), 'wb') as f:
-            pickle.dump(end_res, f)
+            pickle.dump(end_res_1, f)
 
-    def get_nation_for_user(self, user_id: int) -> str:
+    def get_nation_for_user(self, username: str) -> str:
         # 从加载的字典中获取指定用户的国家信息
-        if user_id in self.nation_data:
-            return self.nation_data[user_id]
+        if username in self.nation_data:
+            user_data = self.nation_data[username]
+            return user_data
         else:
             return "未知"  # 如果用户不在结果中
 
-# if __name__ == "__main__": 
+    def get_relation_for_user(self, username: str) -> str:
+        if username in self.graph_data:
+            relation_data = self.graph_data[username]
+            return relation_data
+        else:
+            return "未知"
+
+    # if __name__ == "__main__":
 #     rank = Query() 
 # rank.query_Ranks(["Web 开发"])
 # rank.query_nation()
