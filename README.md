@@ -9,6 +9,9 @@ English | [简体中文](./README_CN.md)
 - 🧱 Basic competency assessment
 - 💗 Multi-user capability assessment
 
+# 🎉 Architecture Doc
+[Architecture Doc](./docs/README.md)
+
 # 📜Tasks
 
 ## Front end
