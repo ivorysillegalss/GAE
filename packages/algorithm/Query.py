@@ -84,9 +84,21 @@ class Query():
         temp = temp.sort_values("ID") 
 
         temp_list = ['登录名', '头像 URL', 'HTML 网址', 'Gravatar ID', '姓名', '公司', '博客', '位置', '邮箱', '个人简介'] 
+        add_dic = {
+            '登录名': 'login', 
+            '头像 URL': 'avatar_url', 
+            'HTML 网址': 'html_url', 
+            'Gravatar ID': 'gravatar_id', 
+            '姓名': 'name',
+            '公司': 'company',
+            '博客': 'blog',
+            '位置': 'location',
+            '邮箱': 'email',
+            '个人简介' : 'bio'
+        }
         df = {'ID': id, 'rank':rank, 'project_score': project_score, 'user_score': user_score}
         for i in temp_list:
-            df[i] = temp[i].tolist() 
+            df[add_dic[i]] = temp[i].tolist() 
         df = pd.DataFrame(df) 
         df.to_parquet("result/all_rank.parquet") 
 
