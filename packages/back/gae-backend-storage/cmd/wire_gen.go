@@ -22,14 +22,15 @@ func InitializeApp() (*bootstrap.Application, error) {
 	databases := bootstrap.NewDatabases(env)
 	poolsFactory := bootstrap.NewPoolFactory()
 	channels := bootstrap.NewChannel()
-	//client := bootstrap.NewRedisDatabase(env)
+	mysqlDatabase := bootstrap.NewMysqlDatabase(env)
+	client := bootstrap.NewRedisDatabase(env)
 	elasticsearchClient := bootstrap.NewEsEngine(env)
 	rpcEngine := bootstrap.NewRpcEngine(env)
 	searchEngine := bootstrap.NewSearchEngine(elasticsearchClient)
 	grpcExecutor := executor.NewGrpcExecutor(rpcEngine, searchEngine)
 	bootstrapExecutor := bootstrap.NewExecutors(grpcExecutor)
-	engines := handler.NewStorageEngine(searchEngine)
-	engine := bootstrap.NewStorageEngine(engines)
+	engines := handler.NewStorageEngine(searchEngine, client)
+	engine := bootstrap.NewStorageEngine(engines, client, mysqlDatabase)
 	application := &bootstrap.Application{
 		StorageEngine: engine,
 		Env:           env,

@@ -45,6 +45,7 @@ type SearchEngine struct {
 
 type StorageEngine struct {
 	ParquetStorage handler.ParquetStorageEngine
+	RedisClient    redis.Client
 }
 
 type RpcEngine struct {
@@ -72,6 +73,6 @@ func NewRpcEngine(env *Env) *RpcEngine {
 	return &RpcEngine{GrpcClient: client}
 }
 
-func NewStorageEngine(engine handler.ParquetStorageEngine) *StorageEngine {
-	return &StorageEngine{ParquetStorage: engine}
+func NewStorageEngine(engine handler.ParquetStorageEngine, client redis.Client, database mysql.Client) *StorageEngine {
+	return &StorageEngine{ParquetStorage: engine, RedisClient: client}
 }

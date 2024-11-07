@@ -9,14 +9,14 @@ import (
 
 func RegisterGrpcServer(rpc *bootstrap.RpcEngine) {
 
-	serverPtr := *rpc.GrpcServer
-	lis, server := serverPtr.Get()
-
-	pb.RegisterStorageServiceServer(server, &Server{})
-	log.Println("Server is running on port 50051")
-	if err := server.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
-	}
+	//serverPtr := *rpc.GrpcServer
+	//lis, server := serverPtr.Get()
+	//
+	//pb.RegisterStorageServiceServer(server, &Server{})
+	//log.Println("Server is running on port 50051")
+	//if err := server.Serve(lis); err != nil {
+	//	log.Fatalf("Failed to serve: %v", err)
+	//}
 }
 
 type Server struct {

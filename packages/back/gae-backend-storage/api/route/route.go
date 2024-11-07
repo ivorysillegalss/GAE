@@ -8,7 +8,7 @@ import (
 func Setup(e *bootstrap.Executor) *gin.Engine {
 	r := gin.Default()
 	defaultCorsConfig(r)
-	e.GrpcServer.SetupGrpc()
+	e.GrpcExecutor.SetupGrpc()
 	return r
 }
 
