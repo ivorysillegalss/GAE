@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package storage;
+
+option go_package = ".proto/";
+
+// 定义服务
+service StorageService {
+  rpc UpdateData (UpdateRequest) returns (UpdateResponse);
+}
+
+// 定义消息
+message UpdateRequest {
+  string data = 1;
+}
+
+message UpdateResponse {
+  string status = 1;
+}
