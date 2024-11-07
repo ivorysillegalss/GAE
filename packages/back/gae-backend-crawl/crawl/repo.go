@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"gae-backend-crawl/bootstrap"
 	"gae-backend-crawl/constant/mq"
+	"gae-backend-crawl/constant/sys"
 	"gae-backend-crawl/domain"
 	"gae-backend-crawl/infrastructure/bloom"
 	kq "gae-backend-crawl/infrastructure/kafka"
@@ -35,10 +36,12 @@ var (
 	repoMessagePusher *kq.Pusher
 	ctx               context.Context
 	client            *github.Client
+	tokenManager      *TokenManager
 )
 
 func init() {
 	ctx = context.Background()
+	repoId = 0
 }
 
 // 注册MQ相关队列
@@ -54,7 +57,14 @@ func crawlPushContributorsInfo(contributors *[]*github.Contributor, b bloom.Clie
 	var contributorsValue []*domain.Contributor
 	var contributorsId []string
 	for _, contributor := range *contributors {
+
+		checkSwitchToken()
+
 		userV, _, err := client.Users.GetByID(ctx, *contributor.ID)
+
+		if userV == nil {
+			continue
+		}
 
 		formatId := strconv.FormatInt(*userV.ID, 10)
 		if err != nil {
@@ -63,12 +73,59 @@ func crawlPushContributorsInfo(contributors *[]*github.Contributor, b bloom.Clie
 		}
 
 		contributorsId = append(contributorsId, formatId)
+
 		v := domain.NewContributorValue(contributor, userV)
+
+		follower, i := crawlContributorFollower(userV.GetLogin())
+		if i == -1 {
+			return nil
+		} else {
+			v.Followers = *follower
+		}
+		following, j := crawlContributorFollowing(userV.GetLogin())
+		if j == -1 {
+			return nil
+		} else {
+			v.Followings = *following
+		}
+
 		contributorsValue = append(contributorsValue, v)
 
 		bloomCheckBeforePush(v, b)
 	}
 	return &contributorsId
+}
+
+func crawlContributorFollower(username string) (*[]*github.User, int) {
+	checkSwitchToken()
+
+	var allFollowers []*github.User
+	opts := &github.ListOptions{PerPage: 100}
+	followers, _, err := client.Users.ListFollowers(ctx, username, opts)
+	if followers == nil {
+		return nil, -1
+	}
+	if err != nil {
+		log.GetTextLogger().Warn("list followers error for user: " + username)
+	}
+	allFollowers = append(allFollowers, followers...)
+	return &allFollowers, 0
+}
+
+func crawlContributorFollowing(username string) (*[]*github.User, int) {
+	checkSwitchToken()
+
+	var allFollowings []*github.User
+	opts := &github.ListOptions{PerPage: 100}
+	following, _, err := client.Users.ListFollowing(ctx, username, opts)
+	if following == nil {
+		return nil, -1
+	}
+	if err != nil {
+		log.GetTextLogger().Warn("list followers error for user: " + username)
+	}
+	allFollowings = append(allFollowings, following...)
+	return &allFollowings, 0
 }
 
 func bloomCheckBeforePush(v *domain.Contributor, b bloom.Client) {
@@ -89,9 +146,18 @@ func bloomCheckBeforePush(v *domain.Contributor, b bloom.Client) {
 
 // DoCrawl 爬取仓库的主方法
 func (r *repoCrawl) DoCrawl() {
+	err := r.bloom.LoadFromFile(sys.BloomFilterFileName)
+	if err != nil {
+		log.GetTextLogger().Warn("Error loading bloom filter:", err)
+	} else {
+		log.GetTextLogger().Info("Bloom filter data loaded or new file created.")
+	}
+
+	r.bloom.StartAutoSave(sys.BloomFilterFileName, sys.BloomFlushDuration)
+
 	registerMessageQueue(r)
 	tokenValue := strings.Split(r.env.GithubTokens, ",")
-	tokenManager := NewTokenManager(tokenValue)
+	tokenManager = NewTokenManager(tokenValue)
 
 	var wg sync.WaitGroup
 	for i := 0; i < mq.MaxGoroutine; i++ {
@@ -99,37 +165,53 @@ func (r *repoCrawl) DoCrawl() {
 		go func() {
 			defer wg.Done()
 			for {
+
+				//如果这里没有可用的 会阻塞住
 				client = tokenManager.GetClient(ctx)
+
 				// 检查限额
-				if tokenManager.CheckRateLimit(client) {
-					log.GetTextLogger().Warn("Token rate limit reached, switching...")
-					continue
-				}
+				checkSwitchToken()
 
 				repoId := getRepoId()
 				repo, _, err := client.Repositories.GetByID(ctx, repoId)
 				if err != nil || repo == nil {
-					//log.GetTextLogger().Warn("Fetching nil repository by Id: %v", err)
+					log.GetTextLogger().Info("Fetching nil repository by Id: %v", err)
 					continue
 				}
 
-				// 仓库信息与贡献者信息爬取完成，进行初步清洗
-				value := domain.NewRepositoryValue(repo)
+				checkSwitchToken()
+				languages, _, err := client.Repositories.ListLanguages(ctx, *repo.Owner.Login, *repo.Name)
+				if err != nil || languages == nil {
+					log.GetTextLogger().Info("Fetching nil repository by Id: %v", err)
+					continue
+				}
+
+				// 仓库信息爬取完成，进行初步清洗
+				value := domain.NewRepositoryValue(repo, languages)
 
 				// 获取该项目的所有贡献者
 				var allContributors []*github.Contributor
+
 				for {
-					if tokenManager.CheckRateLimit(client) {
-						log.GetTextLogger().Warn("Token rate limit reached, switching...")
-						continue
-					}
+					checkSwitchToken()
+
 					opts := &github.ListContributorsOptions{ListOptions: github.ListOptions{PerPage: 100}}
 					contributors, resp, err := client.Repositories.ListContributors(ctx, *repo.Owner.Login, *repo.Name, opts)
+					if contributors == nil {
+						continue
+					}
 
 					if err != nil {
 						log.GetTextLogger().Error("error fetching contributors: %v", err)
 					}
+
+					checkSwitchToken()
+
 					allContributors = append(allContributors, contributors...)
+
+					if resp == nil {
+						continue
+					}
 
 					if resp.NextPage == 0 {
 						break
@@ -138,6 +220,9 @@ func (r *repoCrawl) DoCrawl() {
 				}
 
 				contributorsInfo := crawlPushContributorsInfo(&allContributors, r.bloom)
+				if contributorsInfo == nil {
+					continue
+				}
 				value.ContributorsId = contributorsInfo
 
 				log.GetTextLogger().Info("success repo: ", strconv.FormatInt(repoId, 10))
@@ -153,6 +238,13 @@ func (r *repoCrawl) DoCrawl() {
 		}()
 	}
 	wg.Wait()
+}
+
+func checkSwitchToken() {
+	if tokenManager.CheckRateLimit(client) {
+		log.GetTextLogger().Warn("Token rate limit reached, switching...")
+		client = tokenManager.GetClient(ctx)
+	}
 }
 
 func NewRepoCrawl(b bloom.Client, c *bootstrap.KafkaConf, env *bootstrap.Env) domain.RepoCrawl {

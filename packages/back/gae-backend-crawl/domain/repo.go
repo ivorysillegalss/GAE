@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"gae-backend-crawl/internal/checkutil"
 	"github.com/google/go-github/github"
 	"strconv"
 )
@@ -13,6 +14,7 @@ type RepositoryValue struct {
 	CreatedAt        int64
 	UpdatedAt        int64
 	ForksCount       int
+	MainLanguage     string
 	NetworkCount     int
 	OpenIssuesCount  int
 	StargazersCount  int
@@ -20,6 +22,7 @@ type RepositoryValue struct {
 	WatchersCount    int
 	//Contributors     *[]ContributorInfo
 	ContributorsId *[]string
+	Languages      *[]Language
 }
 
 type ContributorInfo struct {
@@ -27,12 +30,23 @@ type ContributorInfo struct {
 	Contributions int
 }
 
-func NewRepositoryValue(repo *github.Repository) *RepositoryValue {
+type Language struct {
+	Name   string
+	Amount int
+}
+
+func NewRepositoryValue(repo *github.Repository, languages map[string]int) *RepositoryValue {
+	var langList []Language
+	for name, amount := range languages {
+		langList = append(langList, Language{Name: name, Amount: amount})
+	}
+
 	return &RepositoryValue{
 		RepoId:           *repo.ID,
 		OwnerName:        *repo.Owner.Login,
 		OwnerId:          strconv.FormatInt(*repo.Owner.ID, 10),
 		Name:             *repo.Name,
+		MainLanguage:     checkutil.CheckString(repo.Language),
 		CreatedAt:        repo.CreatedAt.Time.Unix(),
 		UpdatedAt:        repo.UpdatedAt.Time.Unix(),
 		ForksCount:       *repo.ForksCount,
@@ -42,6 +56,7 @@ func NewRepositoryValue(repo *github.Repository) *RepositoryValue {
 		SubscribersCount: *repo.SubscribersCount,
 		WatchersCount:    *repo.WatchersCount,
 		ContributorsId:   new([]string),
+		Languages:        &langList,
 	}
 }
 
