@@ -70,18 +70,21 @@ class Query():
         
         result = sorted(dic.items(), key=lambda item: (item[1][0], item[1][1]), reverse=True)
 
-        id, project_score, user_score = [], [], [] 
+        c, id, project_score, user_score, rank = 1, [], [], [], []
+
         for i,j in result: 
             id.append(i) 
             project_score.append(j[0])
             user_score.append(j[1]) 
+            rank.append(c) 
+            c += 1 
         temp = pq.ParquetDataset(r"data\contributor_output.parquet").read().to_pandas()
 
         temp['ID'] = pd.Categorical(temp['ID'], categories=id, ordered=True)
         temp = temp.sort_values("ID") 
 
         temp_list = ['登录名', '头像 URL', 'HTML 网址', 'Gravatar ID', '姓名', '公司', '博客', '位置', '邮箱', '个人简介'] 
-        df = {'ID': id, 'project_score': project_score, 'user_score': user_score}
+        df = {'ID': id, 'rank':rank, 'project_score': project_score, 'user_score': user_score}
         for i in temp_list:
             df[i] = temp[i].tolist() 
         df = pd.DataFrame(df) 
