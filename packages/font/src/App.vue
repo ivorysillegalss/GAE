@@ -4,7 +4,6 @@
       <img src="/logo.svg" class="logo" alt="Vite logo" />
     </div>
     <div class="buttons">
-      <button>首页</button>
       <button>排名</button>
       <button>开发者Nation</button>
       <button>评估报告</button>
@@ -12,7 +11,11 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+// import { ref } from 'vue';
+// import * as api from './api';
+
+</script>
 
 <style scoped>
 .back {
