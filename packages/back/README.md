@@ -1,4 +1,3 @@
-**TalentRank功能架构设计图**
+**GAE功能架构设计图**
 
-
-![ffc9d8bf34df4276edc04281b03bd46](https://github.com/user-attachments/assets/66616ed7-880b-4ae7-941b-21476d8f4d16)
+![GAE ARCHITECTURE](https://github.com/user-attachments/assets/5c5f8dc4-f03a-41e1-8ce5-39a44866dc37)
