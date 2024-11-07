@@ -14,18 +14,24 @@ English | [简体中文](./README_CN.md)
 ## Front end
 
 - [x] Front-end frame construction (project home page, documentation)
+- [x] Front-end and back-end integration testing
 
 ## Back end
 
-- [ ] Basic data collection
+- [x] Basic data collection (data crawling, data storage, and web interface)
+- [x] Data storage and retrieval system (MySQL, Elasticsearch, Redis integration)
+- [x] Data transmission via Kafka (inter-module data decoupling)
 
 ## Algorithm
 
-- [ ] Basic algorithm analysis
+- [x] Basic algorithm analysis (TalentRank computation based on project importance and developer contributions)
+- [x] Nation inference through network analysis
+- [x] Developer field classification and TalentRank-based sorting
+
 
 ## Production
 
-- [ ] Basic product identification
+- [x] Basic product identification
 
 # 🎈Project directory
 
