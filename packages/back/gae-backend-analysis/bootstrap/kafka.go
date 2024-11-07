@@ -6,57 +6,46 @@ import (
 	"github.com/zeromicro/go-zero/core/service"
 )
 
-func initKafkaConf(*Env) map[int]kq.KqConf {
-	m := new(map[int]kq.KqConf)
-	confM := *m
-	conf := kq.KqConf{
-		ServiceConf: service.ServiceConf{
-			Name: mq.UnRankCleansingService,
-		},
-		Brokers: []string{mq.KafkaDefaultLocalBroker},
-		Group:   mq.UnRankCleansingGroup,
-		Topic:   mq.UnRankCleansingTopic,
-		Offset:  mq.FirstOffset,
-		Conns:   1,
-	}
-	confM[mq.UnRankCleansingServiceId] = conf
-
-	// 为 UnCleansingRepo 配置
-	UnCleansingRepoGroup := kq.KqConf{
-		ServiceConf: service.ServiceConf{
-			Name: "gaeUnCleansingRepoService",
-		},
-		Brokers: []string{mq.KafkaDefaultLocalBroker},
-		Group:   mq.UnCleansingRepoGroup,
-		Topic:   mq.UnCleansingRepoTopic,
-		Offset:  mq.FirstOffset,
-		Conns:   1,
-	}
-
-	confM[mq.UnCleansingRepoId] = UnCleansingRepoGroup
-
-	// 为 UnCleansingUser 配置
-	UnCleansingUserGroup := kq.KqConf{
-		ServiceConf: service.ServiceConf{
-			Name: "gaeUnCleansingUserService",
-		},
-		Brokers: []string{mq.KafkaDefaultLocalBroker},
-		Group:   mq.UnCleansingUserGroup,
-		Topic:   mq.UnCleansingUserTopic,
-		Offset:  mq.FirstOffset,
-		Conns:   1,
-	}
-
-	confM[mq.UnCleansingUserId] = UnCleansingUserGroup
-
-	return confM
-}
+var env *Env
 
 func NewKafkaConf(e *Env) *KafkaConf {
-	conf := initKafkaConf(e)
+	conf := *initKafkaConf(e)
 	return &KafkaConf{ConfMap: conf}
 }
 
 type KafkaConf struct {
 	ConfMap map[int]kq.KqConf
+}
+
+func initKafkaConf(e *Env) *map[int]kq.KqConf {
+	env = e
+	confMap := new(map[int]kq.KqConf)
+	m := *confMap
+	m = make(map[int]kq.KqConf)
+
+	// 为 UnCleansingRepo 配置
+	UnCleansingRepoGroup := newConsumerConf(mq.UnCleansingRepoGroup, mq.UnCleansingRepoTopic, mq.UnCleansingRepoServiceName)
+	m[mq.UnCleansingRepoId] = *UnCleansingRepoGroup
+
+	UnCleansingUserGroup := newConsumerConf(mq.UnCleansingUserGroup, mq.UnCleansingUserTopic, mq.UnCleansingUserServiceName)
+	// 为 UnCleansingUser 配置
+
+	m[mq.UnCleansingUserId] = *UnCleansingUserGroup
+
+	return &m
+}
+
+func newConsumerConf(group string, topic string, opts ...any) *kq.KqConf {
+	return &kq.KqConf{
+		ServiceConf: service.ServiceConf{
+			Name: opts[0].(string),
+		},
+		Brokers:    []string{env.KafkaBroker},
+		Group:      group,
+		Topic:      topic,
+		Offset:     mq.FirstOffset,
+		Conns:      env.KafkaConns,
+		Consumers:  env.KafkaConsumers,
+		Processors: env.KafkaProcessors,
+	}
 }

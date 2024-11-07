@@ -23,21 +23,26 @@ func NewTalentCron(t domain.TalentRepository, p *bootstrap.PoolsFactory) domain.
 }
 
 func (t *talentCron) AnalyseContributor() {
+	log.GetTextLogger().Info("start analyse contributor")
 	for {
-		offset, shardValue, err := t.talentRepository.GetAndUpdateCleansingDataShardOffset(mq.UnCleansingUserId)
+		isNil, offset, shardValue, err := t.talentRepository.GetAndUpdateCleansingDataShardOffset(mq.UnCleansingUserId)
+		if isNil {
+			time.Sleep(2 * time.Second)
+			continue
+		}
 		if err != nil {
 			log.GetTextLogger().Error("error in get cleansing data shard offset: " + strconv.Itoa(offset))
 		}
 
 		//TODO O(n)复杂度，待优化
-		var talents []domain.Contributor
+		var talents []*domain.Contributor
 		for _, data := range shardValue {
 			var talent domain.Contributor
 			err = jsoniter.Unmarshal([]byte(data), &talent)
 			if err != nil {
 				log.GetTextLogger().Error("Error unmarshalling JSON: %v", err)
 			}
-			talents = append(talents, talent)
+			talents = append(talents, &talent)
 		}
 
 		h := handler.NewIntermediateHandler()
@@ -61,28 +66,33 @@ func (t *talentCron) AnalyseContributor() {
 }
 
 func (t *talentCron) AnalyseRepo() {
+	log.GetTextLogger().Info("start analyse repo")
 	for {
-		offset, shardValue, err := t.talentRepository.GetAndUpdateCleansingDataShardOffset(mq.UnCleansingRepoId)
+		isNil, offset, shardValue, err := t.talentRepository.GetAndUpdateCleansingDataShardOffset(mq.UnCleansingRepoId)
+		if isNil {
+			time.Sleep(2 * time.Second)
+			continue
+		}
 		if err != nil {
 			log.GetTextLogger().Error("error in get cleansing data shard offset: " + strconv.Itoa(offset))
 		}
 
 		//TODO O(n)复杂度，待优化
-		var talents []domain.Repo
+		var talents []*domain.Repo
 		for _, data := range shardValue {
 			var talent domain.Repo
 			err = jsoniter.Unmarshal([]byte(data), &talent)
 			if err != nil {
 				log.GetTextLogger().Error("Error unmarshalling JSON: %v", err)
 			}
-			talents = append(talents, talent)
+			talents = append(talents, &talent)
 		}
 
 		h := handler.NewIntermediateHandler()
 		var wg sync.WaitGroup
 		task := func() {
 			defer wg.Done()
-			h.WriteData(domain.Talent{Repos: &talents}, mq.UnCleansingUserId)
+			h.WriteData(domain.Talent{Repos: &talents}, mq.UnCleansingRepoId)
 		}
 
 		config := t.poolFactory.Pools[sys.ExecuteTalentAnalysis]
